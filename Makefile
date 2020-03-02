@@ -28,7 +28,7 @@ LDFLAGS = -lm $(GL_LDFLAGS)
 PROGNAME = exec
 HEADERS = bmp.h
 SOURCES = main.c ppm.c modif.c
-#SOURCES = main.c ppm.c modif.c rgb_hls.c
+FILE = img/chatou.ppm
 OBJ = $(SOURCES:.c=.o)
 
 all: $(PROGNAME)
@@ -41,3 +41,6 @@ $(PROGNAME): $(OBJ)
 
 clean:
 	@$(RM) $(PROGNAME) $(OBJ) *~ gmon.out core.*
+
+run:	$(PROGNAME) 
+	./$(PROGNAME) $(FILE)

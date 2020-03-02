@@ -92,19 +92,14 @@ void menuFunc(int item) {
     exit(0);
     break;
   case 1:
-  case 2:
-  case 3:
-  case 4:
-    printf("Tout gris\n");
-	gris_uniforme(image);
-	Display();
+    printf("pressed TODO");
     break;
-  case 5:
+  case 2:
     printf("Entrer le nom pour l'image dans cette taille\n");
     scanf("%s", &s[0]);
     imagesave_PPM(s, image);
     break;
-  case 6:
+  case 3:
     printf("Taille de l image : %ld %ld\n", (int) image->sizeX, (int) image->sizeY);
     break;
   default:
@@ -129,12 +124,9 @@ int main(int argc, char **argv) {
 
   glutCreateMenu(menuFunc);
   glutAddMenuEntry("Quit", 0);
-  glutAddMenuEntry("gris", 1);
-  glutAddMenuEntry("Gris", 2);
-  glutAddMenuEntry("GRIS", 3);
-  glutAddMenuEntry("grey", 4);
-  glutAddMenuEntry("Sauver", 5);
-  glutAddMenuEntry("Informations", 6);
+  glutAddMenuEntry("compress", 1);
+  glutAddMenuEntry("Sauver", 2);
+  glutAddMenuEntry("Informations", 3);
   glutAttachMenu(GLUT_LEFT_BUTTON);
 
   glutDisplayFunc(Display);  
