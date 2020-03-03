@@ -3,6 +3,6 @@
 int main(int argc, char const *argv[])
 {
     Image test_image = gen_test_image();
-    printf("jj");
+    print_image(test_image);
     return 0;
 }

@@ -40,13 +40,13 @@ $(PROGNAME): $(OBJ)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $<
 
 clean:
-	@$(RM) $(PROGNAME) $(OBJ) *~ gmon.out core.*
+	@$(RM) $(PROGNAME) $(OBJ) *~ gmon.out core.* test
 
 run:	$(PROGNAME) 
 	./$(PROGNAME) $(FILE)
 
-test:	compress_test.c
+test:	compress_test.c compress.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) $< compress.o -o $@ 
 
-run_test:	test
+rtest:	test
 	./test
