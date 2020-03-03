@@ -44,3 +44,9 @@ clean:
 
 run:	$(PROGNAME) 
 	./$(PROGNAME) $(FILE)
+
+test:	compress_test.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) $< compress.o -o $@ 
+
+run_test:	test
+	./test
