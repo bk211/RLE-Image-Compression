@@ -8,6 +8,7 @@ To compile the project and obtain the binary excutable, simply run
 # Compilation
 To run the program, simply run 
 <br>$make run
+<br>by default, it open the program with the file can_bottom2.ppm of the img folder
 <br> Or 
 <br>$./exec XXX
 <br> where XXX is the path to ppm image file
@@ -18,7 +19,7 @@ To run the program, simply run
 <br> such as "quit", "save"
 
 # Compatibility
- Make, glut.h needed to run makefile,
+ Make, glut.h are needed to run makefile,
  the program does not run on windows environnement, (due to glut.h dependencies that I'm to lazy to fix).
  <br> Seriously, who use windows?
  
