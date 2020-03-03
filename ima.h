@@ -1,3 +1,6 @@
+#ifndef IMA_H
+#define IMA_H
+
 #include <stdio.h> 
 #include <stdlib.h>
 #include <assert.h>
@@ -29,3 +32,6 @@ void moserr (Image *), mosprox(Image *);
 Image * try2  (Image *);
 Image * toclut  (Image *);
 */
+
+
+#endif
