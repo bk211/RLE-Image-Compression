@@ -1,6 +1,7 @@
 #include <unistd.h>     
 #include <math.h>
 #include "ima.h"
+#include "compress.h"
 
 #include <GL/glut.h>
 #include <GL/glu.h>	
@@ -62,12 +63,13 @@ int ReInit() {
 
 void Display(void) {
   
-  GLint w, h;
+  //GLint w, h;
 
   glClear(GL_COLOR_BUFFER_BIT);
 
-  w = glutGet(GLUT_WINDOW_WIDTH);
-  h = glutGet(GLUT_WINDOW_HEIGHT);
+  //w = glutGet(GLUT_WINDOW_WIDTH);
+  //h = glutGet(GLUT_WINDOW_HEIGHT);
+
   glDrawPixels(image->sizeX, image->sizeY, GL_RGB, GL_UNSIGNED_BYTE, 
 	       image->data);
 
@@ -93,6 +95,7 @@ void menuFunc(int item) {
     break;
   case 1:
     printf("pressed TODO");
+    compress(gen_test_image());
     break;
   case 2:
     printf("Entrer le nom pour l'image dans cette taille\n");
@@ -100,7 +103,7 @@ void menuFunc(int item) {
     imagesave_PPM(s, image);
     break;
   case 3:
-    printf("Taille de l image : %ld %ld\n", (int) image->sizeX, (int) image->sizeY);
+    printf("Taille de l image : %d %d\n", (int) image->sizeX, (int) image->sizeY);
     break;
   default:
     break;

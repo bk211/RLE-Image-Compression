@@ -26,9 +26,9 @@ CFLAGS = -Wall
 LDFLAGS = -lm $(GL_LDFLAGS)
 #definition des fichiers et dossiers
 PROGNAME = exec
-HEADERS = bmp.h
-SOURCES = main.c ppm.c 
-FILE = img/chatou.ppm
+HEADERS = bmp.h compress.h
+SOURCES = main.c ppm.c compress.c
+FILE = img/can_bottom2.ppm
 OBJ = $(SOURCES:.c=.o)
 
 all: $(PROGNAME)
