@@ -2,19 +2,24 @@
 #define COMPRESS_H
 #include "ima.h"
 
+
+#define RED 0
+#define GREEN 1
+#define BLUE 2
+
 struct Image_compressed
 {
     unsigned long sizeX;
     unsigned long sizeY;
-    GLubyte *R;
-    GLubyte *G;
-    GLubyte *B;
+    GLbyte *R;
+    GLbyte *G;
+    GLbyte *B;
     
 };
+typedef struct Image_compressed Image_compressed;
 
+void compress_loop(Image img, Image_compressed dst,unsigned long sizeX, unsigned long sizeY, int begin_step);
 
-
-Image gen_test_image();
 void compress(Image img);
 
 
