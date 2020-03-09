@@ -19,6 +19,8 @@ struct Image_compressed
 typedef struct Image_compressed Image_compressed;
 
 void compress_loop(Image img, Image_compressed dst,unsigned long sizeX, unsigned long sizeY, int begin_step);
+GLbyte * reduce_raw_compressed(GLbyte* raw_compressed, unsigned long *size);
+
 
 void compress(Image img);
 

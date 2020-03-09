@@ -44,6 +44,15 @@ Image gen_test_image(int i){
         
         return foo;
     }
+    else{
+        foo.sizeX = 1;
+        foo.sizeY = 1;
+        foo.data = malloc( foo.sizeX* foo.sizeY * 3 *sizeof(GLubyte));
+        foo.data[0] = 42;
+        foo.data[1] = 42;
+        foo.data[2] = 42;
+        return foo;
+    }
 
 }
 
@@ -53,8 +62,8 @@ int main(int argc, char const *argv[])
     Image test_image = gen_test_image(1);
     print_image(test_image);
     Image_compressed foo;
-    compress_loop(test_image, foo,  test_image.sizeX,   test_image.sizeY, RED);
-    compress_loop(test_image, foo,  test_image.sizeX,   test_image.sizeY, GREEN);
+    //compress_loop(test_image, foo,  test_image.sizeX,   test_image.sizeY, RED);
+    //compress_loop(test_image, foo,  test_image.sizeX,   test_image.sizeY, GREEN);
     compress_loop(test_image, foo,  test_image.sizeX,   test_image.sizeY, BLUE);
     
     return 0;

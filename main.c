@@ -95,7 +95,6 @@ void menuFunc(int item) {
     break;
   case 1:
     printf("pressed TODO");
-    compress(gen_test_image());
     break;
   case 2:
     printf("Entrer le nom pour l'image dans cette taille\n");
