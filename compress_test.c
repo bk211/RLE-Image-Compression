@@ -61,10 +61,7 @@ int main(int argc, char const *argv[])
 {
     Image test_image = gen_test_image(1);
     print_image(test_image);
-    Image_compressed foo;
-    //compress_loop(test_image, foo,  test_image.sizeX,   test_image.sizeY, RED);
-    //compress_loop(test_image, foo,  test_image.sizeX,   test_image.sizeY, GREEN);
-    compress_loop(test_image, foo,  test_image.sizeX,   test_image.sizeY, BLUE);
+    compress(test_image);
     
     return 0;
 }
