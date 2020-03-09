@@ -54,3 +54,5 @@ dkms.conf
 # special ignore
 exec
 test
+Patate.ppm
+foobar.ppm
