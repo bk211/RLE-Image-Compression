@@ -43,6 +43,16 @@ Image gen_test_image(int i){
         foo.data[14] = 50;
         
         return foo;
+    }else if(i == 2){
+        foo.sizeX = 130;
+        foo.sizeY = 2;
+        foo.data = malloc( foo.sizeX* foo.sizeY * 3 *sizeof(GLubyte));
+        for (size_t i = 0; i < 2*130*3; i++)
+        {
+            foo.data[i] = 42;
+        }
+        
+        return foo;
     }
     else{
         foo.sizeX = 1;
@@ -59,9 +69,11 @@ Image gen_test_image(int i){
 
 int main(int argc, char const *argv[])
 {
-    Image test_image = gen_test_image(1);
+    Image test_image = gen_test_image(3);
     print_image(test_image);
-    compress(test_image);
+    Image_compressed foo = compress(test_image);
+
+    write_compressed_image(foo);
     
-    return 0;
+    return 0;  
 }

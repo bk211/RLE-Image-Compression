@@ -33,5 +33,4 @@ Image * try2  (Image *);
 Image * toclut  (Image *);
 */
 
-
 #endif

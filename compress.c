@@ -32,9 +32,10 @@ unsigned long compress_loop(Image img, Image_compressed* dst,unsigned long sizeX
     {
         printf("%hhi, ", img.data[i]);
         if(buffer == img.data[i]){//si suite de valeur identique
-            if(counter < 128){
+            if(counter < 127){
                 counter++;
             }else{
+                printf("<limit counter, push up new> ");
                 tmp_storage[k++] = counter; 
                 tmp_storage[k++] = buffer;
                 counter = 1;
@@ -120,6 +121,12 @@ GLbyte * reduce_raw_compressed(GLbyte* raw_compressed, unsigned long *size){
 
 }
 
+void write_compressed_image(Image_compressed img){
+
+}
+
+
+
 Image_compressed compress(Image img){
     unsigned long sizeX = img.sizeX;
     unsigned long sizeY = img.sizeY;
@@ -129,10 +136,10 @@ Image_compressed compress(Image img){
     result.data = malloc( 3 * sizeof( result.data) );    
     assert(result.data);
     result.sizeChannel = malloc( 3 * sizeof( result.sizeChannel));
-
+    assert(result.sizeChannel);
     result.sizeChannel[RED] = compress_loop(img, &result, sizeX, sizeY, RED);
-    result.sizeChannel[GREEN] = compress_loop(img, &result, sizeX, sizeY, GREEN);
-    result.sizeChannel[BLUE] = compress_loop(img, &result, sizeX, sizeY, BLUE);
+    //result.sizeChannel[GREEN] = compress_loop(img, &result, sizeX, sizeY, GREEN);
+    //result.sizeChannel[BLUE] = compress_loop(img, &result, sizeX, sizeY, BLUE);
 
     return result;
 }
