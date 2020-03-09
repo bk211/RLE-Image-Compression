@@ -121,7 +121,34 @@ GLbyte * reduce_raw_compressed(GLbyte* raw_compressed, unsigned long *size){
 
 }
 
-void write_compressed_image(Image_compressed img){
+void save_compressed_image(char * filename, Image_compressed * img){
+    FILE *fp;
+    //open file for output
+    fp = fopen(filename, "wb");
+    if (!fp) {
+         fprintf(stderr, "Unable to open file '%s'\n", filename);
+         exit(1);
+    }
+
+    //write the header file
+    //image format
+    fprintf(fp, "P6\n");
+
+    //comments
+    fprintf(fp, "# Created by %s\n","CC");
+
+    //image size
+    fprintf(fp, "%lu %lu\n",img->sizeX,img->sizeY);
+
+    // rgb component depth
+    fprintf(fp, "%d\n",255);
+    //fprintf(fp, "%d\n",RGB_COMPONENT_COLOR);
+
+    // pixel data
+    fwrite(img->data[RED], (size_t) 1, (size_t) img->sizeChannel[RED], fp);
+    fwrite(img->data[GREEN], (size_t) 1, (size_t) img->sizeChannel[GREEN], fp);
+    fwrite(img->data[BLUE], (size_t) 1, (size_t) img->sizeChannel[BLUE], fp);
+    fclose(fp);
 
 }
 

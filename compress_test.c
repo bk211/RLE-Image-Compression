@@ -69,11 +69,11 @@ Image gen_test_image(int i){
 
 int main(int argc, char const *argv[])
 {
-    Image test_image = gen_test_image(3);
+    Image test_image = gen_test_image(2);
     print_image(test_image);
     Image_compressed foo = compress(test_image);
 
-    write_compressed_image(foo);
+    save_compressed_image("Patate.ppm",&foo);
     
     return 0;  
 }
