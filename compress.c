@@ -20,11 +20,10 @@ void print_image(Image img){
 
 unsigned long compress_loop(Image img, Image_compressed* dst,unsigned long sizeX, unsigned long sizeY, int color){
     
-    /// >>>> a tester sur repetition > 255, comportement traiter mais non tested
 
     GLubyte buffer = img.data[color];
     GLbyte counter =0;
-    GLbyte * tmp_storage = malloc( sizeX*sizeY * 2 * sizeof(GLubyte)); // compression brute, la pire cas possible est un dedoublement de memoire
+    GLbyte * tmp_storage = malloc( sizeX*sizeY * 2 * sizeof(GLbyte)); // compression brute, la pire cas possible est un dedoublement de memoire
     assert(tmp_storage);
     unsigned long k = 0;
 
@@ -60,7 +59,7 @@ unsigned long compress_loop(Image img, Image_compressed* dst,unsigned long sizeX
     printf("\n>>>k = %ld\n[ ", k);
     for (size_t i = 0; i < k; i++)
     {
-        printf("%hhi ",tmp_storage[i]);
+        printf("%hhu ",tmp_storage[i]);
     }
     printf(" ]\n  ========================= \n");
 
@@ -71,14 +70,14 @@ unsigned long compress_loop(Image img, Image_compressed* dst,unsigned long sizeX
     return k;
 }
 
-GLbyte * reduce_raw_compressed(GLbyte* raw_compressed, unsigned long *size){
+GLbyte * reduce_raw_compressed(GLbyte* raw_compressed, unsigned long * size){
     
     GLbyte * result = malloc( *size * sizeof(GLbyte));
     assert(result);
 
     unsigned long empty_pt = 0, index_pt = 0;
     
-    for (unsigned long i = 0; i < *size; i+=2)//itere sur les conteurs de repetition
+    for (unsigned long i = 0; i < *size; i+=2)//itere sur les indices de repetition de raw_compressed
     {   
         //printf("%hi ",raw_compressed[i]);
         if(raw_compressed[i] > maximum_repeat){ // cas simple, haute repetition, ecriture simple dans result
@@ -87,9 +86,11 @@ GLbyte * reduce_raw_compressed(GLbyte* raw_compressed, unsigned long *size){
             result[empty_pt++] = raw_compressed[i+1];//sauvegarde de la valeur 
         }
         else if(result[index_pt] < 0){// si compteur de redution encours
-            result[index_pt] -= raw_compressed[i];
-            for (unsigned long j = 0; j < raw_compressed[i]; j++){//ajoute le nombre de valeur necessaire
-                result[empty_pt++] = raw_compressed[i+1];
+            if(result[index_pt] - raw_compressed[i] < -127){//limite compteur de non repetition
+                result[index_pt] -= raw_compressed[i];
+                for (unsigned long j = 0; j < raw_compressed[i]; j++){//ajoute le nombre de valeur necessaire
+                    result[empty_pt++] = raw_compressed[i+1];
+                }
             }
         }else{// nouvelle valeur a reduire
             index_pt = empty_pt++; // index_pt recoit un emplace vide
@@ -165,8 +166,8 @@ Image_compressed compress(Image img){
     result.sizeChannel = malloc( 3 * sizeof( result.sizeChannel));
     assert(result.sizeChannel);
     result.sizeChannel[RED] = compress_loop(img, &result, sizeX, sizeY, RED);
-    //result.sizeChannel[GREEN] = compress_loop(img, &result, sizeX, sizeY, GREEN);
-    //result.sizeChannel[BLUE] = compress_loop(img, &result, sizeX, sizeY, BLUE);
+    result.sizeChannel[GREEN] = compress_loop(img, &result, sizeX, sizeY, GREEN);
+    result.sizeChannel[BLUE] = compress_loop(img, &result, sizeX, sizeY, BLUE);
 
     return result;
 }
