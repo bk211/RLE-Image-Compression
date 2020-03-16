@@ -91,7 +91,7 @@ Image gen_test_image(int i){
 int main(int argc, char const *argv[])
 {
     
-    Image test_image = gen_test_image(4);
+    Image test_image = gen_test_image(0);
     print_image(test_image);
     Image_compressed foo = compress(test_image);
 
