@@ -79,29 +79,32 @@ GLbyte * reduce_raw_compressed(GLbyte* raw_compressed, unsigned long * size){
     printf("start compressing\n");
     for (unsigned long i = 0; i < *size; i+=2)//itere sur les indices de repetition de raw_compressed
     {   
-        printf(">>%hhi\n ",raw_compressed[i]);
+        //printf(">>%hhi\n ",raw_compressed[i]);
         if(raw_compressed[i] > maximum_repeat){ // cas simple, haute repetition, ecriture simple dans result
             printf("CANT HAPPENDED");
             index_pt = empty_pt++; // index_pt recoit un emplace vide
             result[index_pt] = raw_compressed[i];//savegarde du compteur
             result[empty_pt++] = raw_compressed[i+1];//sauvegarde de la valeur 
         }
-        else if(result[index_pt] < 0){// si compteur de redution encours
-            printf("here \n");
-            printf("%hhi %hhi %hhi \n",result[0], result[1] , result[2]);
-            
-            printf("%hhi %hhi %hhi \n",result[index_pt] , raw_compressed[i], result[index_pt] - raw_compressed[i]);
-            if(result[index_pt] - raw_compressed[i] > -127){//limite compteur de non repetition
-                printf("in if\n");
+        else if(result[index_pt] < 0 ){// si compteur de redution encours
+        //else if(result[index_pt] < 0 && (result[index_pt] - raw_compressed[i] > -128)){// si compteur de redution encours
+                    //printf("here \n");
+            //printf("%hhi %hhi %hhi \n",result[0], result[1] , result[2]);
+            //printf("%hhi %hhi %hhi \n",result[index_pt] , raw_compressed[i], result[index_pt] - raw_compressed[i]);
+            if(result[index_pt] - raw_compressed[i] > -128){//limite compteur de non repetition
+                //printf("in if\n");
                 result[index_pt] -= raw_compressed[i];
                 for (unsigned long j = 0; j < raw_compressed[i]; j++){//ajoute le nombre de valeur necessaire
                     result[empty_pt++] = raw_compressed[i+1];
                 }
             }else{
                 printf("in else\n");
-                exit(0);
+                index_pt = empty_pt++; // index_pt recoit un emplace vide
+                result[index_pt] = raw_compressed[i] * -1; //flip du compteur
+                for (unsigned long j = 0; j < raw_compressed[i]; j++){//ajoute le nombre de valeur necessaire
+                result[empty_pt++] = raw_compressed[i+1];
+                }
             }
-            printf("exiting\n");
         }else{// nouvelle valeur a reduire
             //printf("getting new\n");
             index_pt = empty_pt++; // index_pt recoit un emplace vide
