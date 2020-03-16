@@ -9,7 +9,7 @@ void print_image(Image img){
     {
         for (size_t j = 0; j < img.sizeX; j++)
         {
-            printf("[%hhi,%hhi,%hhi]",img.data[i*img.sizeY*3 + j*3],img.data[i*img.sizeY*3 + j*3+1],img.data[i*img.sizeY*3 + j *3 +2]);
+            printf("[%hhu,%hhu,%hhu]",img.data[i*img.sizeY*3 + j*3],img.data[i*img.sizeY*3 + j*3+1],img.data[i*img.sizeY*3 + j *3 +2]);
         }
         printf("\n");
     }

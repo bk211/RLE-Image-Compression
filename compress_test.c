@@ -81,7 +81,7 @@ Image gen_test_image(int i){
         foo.data = malloc( foo.sizeX* foo.sizeY * 3 *sizeof(GLubyte));
         foo.data[0] = 240;
         foo.data[1] = 42;
-        foo.data[2] = 42;
+        foo.data[2] = 201;
         return foo;
     }
 
@@ -91,17 +91,11 @@ Image gen_test_image(int i){
 int main(int argc, char const *argv[])
 {
     
-    Image test_image = gen_test_image(0);
+    Image test_image = gen_test_image(5);
     print_image(test_image);
-    Image_compressed foo = compress(test_image);
-
-    //save_compressed_image("Patate.ppm",&foo);
+    //Image_compressed foo = compress(test_image);
     
-
-
-
-
-
+    //save_compressed_image("Patate.ppm",&foo);
     
     /*
     // tests de limites et de conversion
@@ -124,5 +118,7 @@ int main(int argc, char const *argv[])
     
     printf("%hhi %hhi %hhi %hhi %hhi\n", -1, 1 , -127, -1 -1, -1 -1 < -127 );
     */
+
+
     return 0;  
 }
