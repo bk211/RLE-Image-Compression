@@ -56,3 +56,4 @@ exec
 test
 Patate.ppm
 foobar.ppm
+.vscode/*
