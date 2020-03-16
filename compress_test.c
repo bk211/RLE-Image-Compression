@@ -53,6 +53,16 @@ Image gen_test_image(int i){
         }
         
         return foo;
+    }else if(i == 3){
+        foo.sizeX = 100;
+        foo.sizeY = 1;
+        foo.data = malloc( foo.sizeX* foo.sizeY * 3 *sizeof(GLubyte));
+        for (size_t i = 0; i < foo.sizeX * foo.sizeY * 3; i++)
+        {
+            foo.data[i] = i;
+        }
+        
+        return foo;
     }
     else{
         foo.sizeX = 1;
@@ -69,21 +79,39 @@ Image gen_test_image(int i){
 
 int main(int argc, char const *argv[])
 {
-    /*
-    Image test_image = gen_test_image(2);
+    
+    Image test_image = gen_test_image(3);
     print_image(test_image);
     Image_compressed foo = compress(test_image);
 
-    save_compressed_image("Patate.ppm",&foo);
-    */
-    GLubyte a = (GLubyte)256;
-    GLubyte b = (GLubyte)257;
-    GLubyte c = (GLubyte)258;// [0] -> [127] -> [128/-128] []
+    //save_compressed_image("Patate.ppm",&foo);
+    
+
+
+
+
+
+    
+    /*
+    // tests de limites et de conversion
+    GLubyte a = 60;
+    GLubyte b = 68;
+    GLubyte c = 67;// [0] -> [127] -> [128/-128] []
     printf("%hhu %hhu %hhu\n", a , b, c);
     printf("%hhi %hhi %hhi\n", a, b, c);
-
+    printf("\n");
     printf("%hhu %hhu %hhu\n", a *-1, b *-1, c * -1);
     printf("%hhi %hhi %hhi\n", a *-1, b *-1, c * -1);
     
+    printf("\n");
+    printf("%hhu %hhu %hhu\n", a + b ,a +c , c);
+    printf("%hhi %hhi %hhi\n", a + b, a + c, c);
+    
+    printf("\n");
+    printf("%hhu %hhu %hhu\n", a *-1 -b  , b *-1 -c, c * -1);
+    printf("%hhi %hhi %hhi\n", a *-1 -b, b *-1 - c, c * -1);
+    
+    printf("%hhi %hhi %hhi %hhi %hhi\n", -1, 1 , -127, -1 -1, -1 -1 < -127 );
+    */
     return 0;  
 }
