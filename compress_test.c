@@ -91,20 +91,30 @@ Image gen_test_image(int i){
 int main(int argc, char const *argv[])
 {
     
-    Image test_image = gen_test_image(5);
+    Image test_image = gen_test_image(0);
     print_image(test_image);
     short tmp_h;
     GLubyte tmp_s;
     GLubyte tmp_l;
-    rgb_to_hsv(test_image.data[0], test_image.data[1], test_image.data[2], &tmp_h, &tmp_s, &tmp_l);
-    rgb_to_hsv(100, 5, 120, &tmp_h, &tmp_s, &tmp_l);
-    rgb_to_hsv(51, 153, 204, &tmp_h, &tmp_s, &tmp_l);
-    
-    //Image_compressed foo = compress(test_image);
-    //save_compressed_image("Patate.ppm",&foo);
-    
+
+    // test conversion rgb -> hsv
     /*
+    rgb_to_hsv(test_image.data[0], test_image.data[1], test_image.data[2], &tmp_h, &tmp_s, &tmp_l); 
+    // attendu: 312, 82.5, 94.1
+    rgb_to_hsv(100, 5, 120, &tmp_h, &tmp_s, &tmp_l);
+    // attendu: 290 95.8 47.1
+    rgb_to_hsv(51, 153, 204, &tmp_h, &tmp_s, &tmp_l);
+    // attendu: 200 75 80
+    */
+
+    //test compression et sauvegarde
+    
+    Image_compressed foo = compress(test_image);
+    save_compressed_image("Patate.ppm",&foo);
+    
+
     // tests de limites et de conversion
+    /*
     GLubyte a = 60;
     GLubyte b = 68;
     GLubyte c = 67;// [0] -> [127] -> [128/-128] []
