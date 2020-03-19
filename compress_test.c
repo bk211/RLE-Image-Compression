@@ -96,13 +96,11 @@ int main(int argc, char const *argv[])
     short tmp_h;
     GLubyte tmp_s;
     GLubyte tmp_l;
-    //rgb_to_hsv(test_image.data[0], test_image.data[1], test_image.data[2], &tmp_h, &tmp_s, &tmp_l);
-    //rgb_to_hsv(test_image.data[0], test_image.data[1], test_image.data[2], &tmp_h, &tmp_s, &tmp_l);
-    //rgb_to_hsv(100, 5, 120, &tmp_h, &tmp_s, &tmp_l);
+    rgb_to_hsv(test_image.data[0], test_image.data[1], test_image.data[2], &tmp_h, &tmp_s, &tmp_l);
+    rgb_to_hsv(100, 5, 120, &tmp_h, &tmp_s, &tmp_l);
     rgb_to_hsv(51, 153, 204, &tmp_h, &tmp_s, &tmp_l);
     
     //Image_compressed foo = compress(test_image);
-    
     //save_compressed_image("Patate.ppm",&foo);
     
     /*

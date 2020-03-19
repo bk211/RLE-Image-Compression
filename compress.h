@@ -26,6 +26,6 @@ void save_compressed_image(char * filename,Image_compressed * img);
 
 
 void print_image(Image img);
-void rgb_to_hsv(GLubyte r, GLubyte g, GLubyte b, short * h, GLubyte * s, GLubyte * l);
+void rgb_to_hsv(GLubyte r, GLubyte g, GLubyte b, short * h, GLubyte * s, GLubyte * v);
 
 #endif
