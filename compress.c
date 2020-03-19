@@ -133,41 +133,41 @@ double max3(double x, double y, double z){
 double min3(double x, double y, double z){
     return x < y? (x < z? x : z) : (y < z ? y : z);
 }
+
+
 void rgb_to_hsv(GLubyte r, GLubyte g, GLubyte b, short * h, GLubyte * s, GLubyte * l){
     printf("starting :\nR = %hhu ,G = %hhu,B = %hhu\n", r,g,b);
     double R = r / 255.0 , G = g / 255.0 , B = b / 255.0;
+    printf("R = %lf, G = %lf, B = %lf\n", R, G, B);
     double M = max3(R, G, B);
     double m = min3(R, G, B);
     double C = M - m;
     GLubyte S, L;
-    short tmp_T, T;
-    double tmp;
+    short T;
     printf("M = %lf, m = %lf, C = %lf \n", M, m, C);
     
     if(C == 0 ){// cas indefinie
-        tmp_T = 361;
-        printf("c0, %hi",tmp_T);
+        T = 361;
+        //printf("c0, %hi",tmp_T);
     }else if(M == R){
-        tmp_T = (short)((G-B) / C ) % 6 ;
-        printf("here\n");
-        printf("tmpT = %hi \n",tmp_T);
+        T = fmod(((G-B) / C ) , 6) * 60;
+        //printf("RtmpT = %f \n",tmp_T);
     }else if(M == G){
-        tmp_T = (short)((B-R) / C + 2) % 6 ;
-        printf("tmpT = %hi \n",tmp_T);    
+        T = fmod(((B-R) / C + 2) , 6) * 60;
+        //printf("GtmpT = %f \n",tmp_T);    
     }else if(M == B){
-        tmp_T = (short)( (R-G) / C + 4) % 6;
-        printf("tmpT = %hi \n",tmp_T);    
+        T = fmod(((R-G) / C + 4), 6.0) * 60;
+        //printf("BtmpT = %f \n",tmp_T);    
     }
 
     
-    T = 60 * tmp_T;
-    printf("T = %hi\n",T);
+    printf("T = %hi\n", T);
+    
     
     if(M == 0 ){
         S = 0;
     }else{
         S = (C / M) * 100 + 0.5;
-        printf(">%lf\n", C/M);
     }
     
     L = M * 100 + 0.5;

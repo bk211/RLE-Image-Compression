@@ -1,6 +1,7 @@
 #ifndef COMPRESS_H
 #define COMPRESS_H
 #include "ima.h"
+#include <math.h>
 
 #define RED 0
 #define GREEN 1

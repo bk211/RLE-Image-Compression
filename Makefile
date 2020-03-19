@@ -46,7 +46,7 @@ run:	$(PROGNAME)
 	./$(PROGNAME) $(FILE)
 
 test:	compress_test.c compress.o
-	$(CC) $(CPPFLAGS) $(CFLAGS) $< compress.o -o $@ 
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $< compress.o -o $@ 
 
 rtest:	test
 	./test
