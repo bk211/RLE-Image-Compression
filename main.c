@@ -7,6 +7,8 @@
 #include <GL/glu.h>	
 
 Image *image;
+Image_compressed foo;
+
 
 #define ESCAPE 27
 
@@ -94,7 +96,8 @@ void menuFunc(int item) {
     exit(0);
     break;
   case 1:
-    printf("pressed TODO");
+    foo = compress(*image);
+    save_compressed_image("Patate.ppm",&foo);
     break;
   case 2:
     printf("Entrer le nom pour l'image dans cette taille\n");
