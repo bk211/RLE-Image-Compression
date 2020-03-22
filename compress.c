@@ -238,7 +238,7 @@ Image_HSV conv_RGB_img_to_HSV_img(Image src){
 }
 
 
-Image_compressed compress(Image img){
+Image_compressed create_compressed_image_from_RGB(Image img){
     unsigned long sizeX = img.sizeX;
     unsigned long sizeY = img.sizeY;
     Image_compressed result;

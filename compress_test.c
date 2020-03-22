@@ -115,7 +115,8 @@ int main(int argc, char const *argv[])
 
     //test compression et sauvegarde
     
-    Image_compressed foo = compress(test_image);
+    Image_compressed foo = create_compressed_image_from_RGB(test_image);
+
     //save_compressed_image("Patate.ppm",&foo);
     
 

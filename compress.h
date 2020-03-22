@@ -32,7 +32,7 @@ unsigned long compress_RGB(Image img, Image_compressed * dst,unsigned long sizeX
 GLbyte * reduce_raw_compressed(GLbyte* raw_compressed, unsigned long *size);
 
 
-Image_compressed compress(Image img);
+Image_compressed create_compressed_image_from_RGB(Image img);
 
 void save_compressed_image(char * filename,Image_compressed * img);
 
