@@ -202,15 +202,19 @@ void rgb_to_hsv(GLubyte r, GLubyte g, GLubyte b, short * h, GLubyte * s, GLubyte
     }
     
     *v = M * 100 + 0.5;
-    printf("result >> %hi %hhu %hhu\n", *h, *s, *v);
+    //printf("result >> %hi %hhu %hhu\n", *h, *s, *v);
     
 }
 
 void conv_RGB_HSV(Image src, Image_HSV dst){
     short h;
     GLubyte s,v;
-    for (size_t i = 0; i < src.sizeY * src.sizeY * 3; i+=3){
-        rgb_to_hsv(src.data[i], src.data[i+1], src.data[i+2], &h, &s, &v);
+    unsigned long size = src.sizeX * src.sizeY;
+    for (size_t i = 0; i < size; i++){
+        rgb_to_hsv(src.data[i*3], src.data[i*3+1], src.data[i*3+2], &h, &s, &v);
+        dst.Hdata[i] = h;
+        dst.SVdata[S][i] = s;
+        dst.SVdata[V][i] = v;
     }
     
 }
