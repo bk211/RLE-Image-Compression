@@ -119,7 +119,7 @@ GLbyte * reduce_raw_compressed(GLbyte* raw_compressed, unsigned long * size){
 
     free(raw_compressed); // libere la memoire de la compression brute
     //reduction de l'espace memoire
-    result = (GLbyte*) realloc(result, empty_pt * sizeof(GLbyte));
+    //result = (GLbyte*) realloc(result, empty_pt * sizeof(GLbyte));
 
     *size = empty_pt; 
     return result;
@@ -135,42 +135,6 @@ double min3(double x, double y, double z){
 }
 
 
-void rgb_to_hsv(GLubyte r, GLubyte g, GLubyte b, short * h, GLubyte * s, GLubyte * v){
-    printf("\nR = %hhu, G = %hhu, B = %hhu\n", r,g,b);
-    double R = r / 255.0 , G = g / 255.0 , B = b / 255.0;
-    printf("R = %lf, G = %lf, B = %lf\n", R, G, B);
-    double M = max3(R, G, B);
-    double m = min3(R, G, B);
-    double C = M - m;
-    printf("M = %lf, m = %lf, C = %lf \n", M, m, C);
-    
-    if(C == 0 ){// cas indefinie
-        *h = 361;
-        //printf("c0, %hi",T);
-    }else if(M == R){
-        *h = round(fmod(((G-B) / C ) , 6) * 60);
-        *h = *h > 0? *h : *h + 360; 
-        printf("R*h = %hi \n",*h);
-    }else if(M == G){
-        *h = round(fmod(((B-R) / C + 2) , 6) * 60);
-        *h = *h > 0? *h : *h + 360; 
-        //printf("GT = %hi \n",*h);    
-    }else if(M == B){
-        *h = round(fmod(((R-G) / C + 4), 6.0) * 60);
-        *h = *h > 0? *h : *h + 360; 
-        printf("BT = %hi \n",*h);    
-    }
-    
-    if(M == 0 ){
-        *s = 0;
-    }else{
-        *s = (C / M) * 100 + 0.5;
-    }
-    
-    *v = M * 100 + 0.5;
-    printf("result >> %hi %hhu %hhu\n", *h, *s, *v);
-    
-}
 
 
 void save_compressed_image(char * filename, Image_compressed * img){
@@ -201,9 +165,68 @@ void save_compressed_image(char * filename, Image_compressed * img){
     fwrite(img->data[GREEN], (size_t) 1, (size_t) img->sizeChannel[GREEN], fp);
     fwrite(img->data[BLUE], (size_t) 1, (size_t) img->sizeChannel[BLUE], fp);
     fclose(fp);
-
 }
 
+//Image decompress_RGB(Image_compressed img){}
+
+void rgb_to_hsv(GLubyte r, GLubyte g, GLubyte b, short * h, GLubyte * s, GLubyte * v){
+    //printf("\nR = %hhu, G = %hhu, B = %hhu\n", r,g,b);
+    double R = r / 255.0 , G = g / 255.0 , B = b / 255.0;
+    //printf("R = %lf, G = %lf, B = %lf\n", R, G, B);
+    double M = max3(R, G, B);
+    double m = min3(R, G, B);
+    double C = M - m;
+    //printf("M = %lf, m = %lf, C = %lf \n", M, m, C);
+    
+    if(C == 0 ){// cas indefinie
+        *h = 361;
+        //printf("c0, %hi",T);
+    }else if(M == R){
+        *h = round(fmod(((G-B) / C ) , 6) * 60);
+        *h = *h > 0? *h : *h + 360; 
+    //    printf("R*h = %hi \n",*h);
+    }else if(M == G){
+        *h = round(fmod(((B-R) / C + 2) , 6) * 60);
+        *h = *h > 0? *h : *h + 360; 
+        //printf("GT = %hi \n",*h);    
+    }else if(M == B){
+        *h = round(fmod(((R-G) / C + 4), 6.0) * 60);
+        *h = *h > 0? *h : *h + 360; 
+  //      printf("BT = %hi \n",*h);    
+    }
+    
+    if(M == 0 ){
+        *s = 0;
+    }else{
+        *s = (C / M) * 100 + 0.5;
+    }
+    
+    *v = M * 100 + 0.5;
+    printf("result >> %hi %hhu %hhu\n", *h, *s, *v);
+    
+}
+
+void conv_RGB_HSV(Image src, Image_HSV dst){
+    short h;
+    GLubyte s,v;
+    for (size_t i = 0; i < src.sizeY * src.sizeY * 3; i+=3){
+        rgb_to_hsv(src.data[i], src.data[i+1], src.data[i+2], &h, &s, &v);
+    }
+    
+}
+
+
+Image_HSV conv_RGB_img_to_HSV_img(Image src){
+    Image_HSV result;
+    result.sizeX = src.sizeX;
+    result.sizeY = src.sizeY;
+    result.Hdata = malloc( result.sizeX * result.sizeY * sizeof(result.Hdata));
+    result.SVdata = malloc( 2 * sizeof(result.SVdata));    
+    result.SVdata[S] = malloc( result.sizeX * result.sizeY * sizeof(result.SVdata[S]));
+    result.SVdata[V] = malloc( result.sizeX * result.sizeY * sizeof(result.SVdata[V]));
+    conv_RGB_HSV(src, result);
+    return result;
+}
 
 
 Image_compressed compress(Image img){

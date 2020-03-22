@@ -91,11 +91,19 @@ Image gen_test_image(int i){
 int main(int argc, char const *argv[])
 {
     
-    Image test_image = gen_test_image(0);
+    Image test_image = gen_test_image(-1);
     print_image(test_image);
-    short tmp_h;
-    GLubyte tmp_s;
-    GLubyte tmp_l;
+    Image_HSV bar = conv_RGB_img_to_HSV_img(test_image);
+    for (size_t i = 0; i < bar.sizeX * bar.sizeY; i++)
+    {
+        printf("%hi ",bar.Hdata[i]);
+        printf("%hhu %hhu", bar.SVdata[S][i], bar.SVdata[V][i]);
+    }
+    
+
+    //short tmp_h;
+    //GLubyte tmp_s;
+    //GLubyte tmp_l;
 
     // test conversion rgb -> hsv
     /*
@@ -109,8 +117,8 @@ int main(int argc, char const *argv[])
 
     //test compression et sauvegarde
     
-    Image_compressed foo = compress(test_image);
-    save_compressed_image("Patate.ppm",&foo);
+    //Image_compressed foo = compress(test_image);
+    //save_compressed_image("Patate.ppm",&foo);
     
 
     // tests de limites et de conversion
