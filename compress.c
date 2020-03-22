@@ -16,45 +16,49 @@ void print_image(Image img){
     
 }
 
-
-
-unsigned long compress_loop(Image img, Image_compressed* dst,unsigned long sizeX, unsigned long sizeY, int color){
-    
-
-    GLubyte buffer = img.data[color];
+unsigned long compress_GLubyte(GLubyte * data, GLbyte * storage, int type, unsigned long size){
+    GLubyte buffer = data[type];
     GLbyte counter =0;
+    unsigned long k = 0;
+    for (unsigned long i = type; i < size * 3; i+=3)
+        {
+            printf("%hhu, ", data[i]);
+            if(buffer == data[i]){//si suite de valeur identique
+                if(counter < 127){
+                    counter++;
+                }else{
+                    printf("<limit counter, push up new> ");
+                    storage[k++] = counter; 
+                    storage[k++] = buffer;
+                    counter = 1;
+                }
+            //    printf(">i=%ld : same\n", i);
+            }else{ // sinon 
+            //    printf(">i=%ld : not same\n", i);
+                //sauvegarde dans storage
+                storage[k++] = counter; 
+                storage[k++] = buffer;
+                //reaffectation du nouveau buffer de test
+                counter = 1;
+                buffer = data[i];
+            }
+        }
+
+        storage[k++] = counter; 
+        storage[k++] = buffer;
+
+    return k;
+}
+
+
+
+
+unsigned long compress_RGB(Image img, Image_compressed* dst,unsigned long sizeX, unsigned long sizeY, int color){
+    
     GLbyte * tmp_storage = malloc( sizeX*sizeY * 2 * sizeof(GLbyte)); // compression brute, la pire cas possible est un dedoublement de memoire
     assert(tmp_storage);
-    unsigned long k = 0;
-
-    for (unsigned long i = color; i < sizeX * sizeY * 3; i+=3)
-    {
-        printf("%hhu, ", img.data[i]);
-        if(buffer == img.data[i]){//si suite de valeur identique
-            if(counter < 127){
-                counter++;
-            }else{
-                printf("<limit counter, push up new> ");
-                tmp_storage[k++] = counter; 
-                tmp_storage[k++] = buffer;
-                counter = 1;
-            }
-        //    printf(">i=%ld : same\n", i);
-        }else{ // sinon 
-        //    printf(">i=%ld : not same\n", i);
-            //sauvegarde dans tmp_storage
-            tmp_storage[k++] = counter; 
-            tmp_storage[k++] = buffer;
-            //reaffectation du nouveau buffer de test
-            counter = 1;
-            buffer = img.data[i];
-        }
-    }
-
-    tmp_storage[k++] = counter; 
-    tmp_storage[k++] = buffer;
+    unsigned long k = compress_GLubyte(img.data, tmp_storage, color, sizeX * sizeY);
     
-
     // affiche le contenue de tmp_storage
     printf("\n>>>k = %ld\n[ ", k);
     for (size_t i = 0; i < k; i++)
@@ -65,7 +69,8 @@ unsigned long compress_loop(Image img, Image_compressed* dst,unsigned long sizeX
 
     //reduit le resultat brute via la methode SGI
     tmp_storage = reduce_raw_compressed(tmp_storage, &k);
-    dst->data[color] = tmp_storage; // stockage dans l'image dst
+    // stockage dans l'image dst
+    dst->data[color] = tmp_storage; 
 
     return k;
 }
@@ -243,9 +248,9 @@ Image_compressed compress(Image img){
     assert(result.data);
     result.sizeChannel = malloc( 3 * sizeof( result.sizeChannel));
     assert(result.sizeChannel);
-    result.sizeChannel[RED] = compress_loop(img, &result, sizeX, sizeY, RED);
-    result.sizeChannel[GREEN] = compress_loop(img, &result, sizeX, sizeY, GREEN);
-    result.sizeChannel[BLUE] = compress_loop(img, &result, sizeX, sizeY, BLUE);
+    result.sizeChannel[RED] = compress_RGB(img, &result, sizeX, sizeY, RED);
+    result.sizeChannel[GREEN] = compress_RGB(img, &result, sizeX, sizeY, GREEN);
+    result.sizeChannel[BLUE] = compress_RGB(img, &result, sizeX, sizeY, BLUE);
 
     return result;
 }

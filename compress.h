@@ -28,7 +28,7 @@ struct Image_HSV
 typedef struct Image_HSV Image_HSV;
 
 
-unsigned long compress_loop(Image img, Image_compressed * dst,unsigned long sizeX, unsigned long sizeY, int color);
+unsigned long compress_RGB(Image img, Image_compressed * dst,unsigned long sizeX, unsigned long sizeY, int color);
 GLbyte * reduce_raw_compressed(GLbyte* raw_compressed, unsigned long *size);
 
 
