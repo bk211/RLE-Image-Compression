@@ -53,11 +53,11 @@ unsigned long compress_GLubyte(GLubyte * data, GLbyte * storage, int type, unsig
 
 
 
-unsigned long compress_RGB(Image img, Image_compressed* dst,unsigned long sizeX, unsigned long sizeY, int color){
+unsigned long compress_RGB(Image img, Image_RGB_compressed* dst, int color){
     
-    GLbyte * tmp_storage = malloc( sizeX*sizeY * 2 * sizeof(GLbyte)); // compression brute, la pire cas possible est un dedoublement de memoire
+    GLbyte * tmp_storage = malloc( img.sizeX * img.sizeY * 2 * sizeof(GLbyte)); // compression brute, la pire cas possible est un dedoublement de memoire
     assert(tmp_storage);
-    unsigned long k = compress_GLubyte(img.data, tmp_storage, color, sizeX * sizeY);
+    unsigned long k = compress_GLubyte(img.data, tmp_storage, color, img.sizeX * img.sizeY);
     
     // affiche le contenue de tmp_storage
     printf("\n>>>k = %ld\n[ ", k);
@@ -142,7 +142,7 @@ double min3(double x, double y, double z){
 
 
 
-void save_compressed_image(char * filename, Image_compressed * img){
+void save_compressed_image(char * filename, Image_RGB_compressed * img){
     FILE *fp;
     //open file for output
     fp = fopen(filename, "wb");
@@ -238,19 +238,34 @@ Image_HSV conv_RGB_img_to_HSV_img(Image src){
 }
 
 
-Image_compressed create_compressed_image_from_RGB(Image img){
-    unsigned long sizeX = img.sizeX;
-    unsigned long sizeY = img.sizeY;
-    Image_compressed result;
-    result.sizeX = sizeX;
-    result.sizeY = sizeY;
-    result.data = malloc( 3 * sizeof( result.data) );    
+Image_RGB_compressed create_compressed_image_from_RGB(Image img){
+    Image_RGB_compressed result;
+    result.sizeX = img.sizeX;
+    result.sizeY = img.sizeY;
+    result.data = malloc( 3 * sizeof( result.data) ); // 3 ptr vers 3 tableau de donner non alloue
     assert(result.data);
-    result.sizeChannel = malloc( 3 * sizeof( result.sizeChannel));
+    result.sizeChannel = malloc( 3 * sizeof( result.sizeChannel));// tableau de 3 size rgb
     assert(result.sizeChannel);
-    result.sizeChannel[RED] = compress_RGB(img, &result, sizeX, sizeY, RED);
-    result.sizeChannel[GREEN] = compress_RGB(img, &result, sizeX, sizeY, GREEN);
-    result.sizeChannel[BLUE] = compress_RGB(img, &result, sizeX, sizeY, BLUE);
-
+    result.sizeChannel[RED] = compress_RGB(img, &result, RED);
+    result.sizeChannel[GREEN] = compress_RGB(img, &result, GREEN);
+    result.sizeChannel[BLUE] = compress_RGB(img, &result, BLUE);
     return result;
+}
+
+unsigned long compress_Hue(Image_HSV img, Image_HSV_compressed dst){
+
+}
+
+Image_HSV_compressed create_compressed_image_from_HSV(Image_HSV img){
+    Image_HSV_compressed result;
+    result.sizeX = img.sizeX;
+    result.sizeY = img.sizeY;
+    result.sizeChannel = malloc(3 * sizeof(result.sizeChannel)); // tableau de 3 size h+s+v
+    assert(result.sizeChannel);
+    result.SVdata = malloc(2 * sizeof( result.SVdata));
+    assert(result.SVdata);
+
+
+
+
 }
