@@ -72,7 +72,7 @@ unsigned long compress_RGB(Image img, Image_RGB_compressed* dst, int color){
     //reduit le resultat brute via la methode SGI
     tmp_storage = reduce_raw_compressed(tmp_storage, &k);
     // stockage dans l'image dst
-    dst->data[color] = tmp_storage; 
+    dst->data[color] = (GLubyte*)tmp_storage; 
 
     return k;
 }
@@ -113,8 +113,6 @@ GLbyte * reduce_raw_compressed(GLbyte* raw_compressed, unsigned long * size){
 
     }
     
-
-
     // affiche le contenue apres reduction
     printf("After compression : empty_pt = %ld\n[", empty_pt);
     //printf("After compression : index_pt = %ld\n[ ", index_pt);
@@ -254,18 +252,117 @@ Image_RGB_compressed create_compressed_image_from_RGB(Image img){
     return result;
 }
 
-unsigned long compress_Hue(Image_HSV img, Image_HSV_compressed dst){
+
+GLshort * reduce_raw_compressed_hue(GLshort* raw_compressed, unsigned long * size){
+    
+    GLshort * result = malloc( *size * sizeof(GLshort));
+    assert(result);
+
+    unsigned long empty_pt = 0, index_pt = 0;
+    //printf("start compressing\n");
+    for (unsigned long i = 0; i < *size; i+=2)//itere sur les indices de repetition de raw_compressed
+    {   
+        //printf(">>%hi\n ",raw_compressed[i]);
+        if(raw_compressed[i] > maximum_repeat){ // cas simple, haute repetition, ecriture simple dans result
+            index_pt = empty_pt++; // index_pt recoit un emplace vide
+            result[index_pt] = raw_compressed[i];//savegarde du compteur
+            result[empty_pt++] = raw_compressed[i+1];//sauvegarde de la valeur 
+        }
+        else if(result[index_pt] < 0 && (result[index_pt] - raw_compressed[i] > -128)){// si compteur de redution encours
+            //printf("here \n");
+            //printf("%hi %hi %hi \n",result[0], result[1] , result[2]);
+            //printf("%hi %hi %hi \n",result[index_pt] , raw_compressed[i], result[index_pt] - raw_compressed[i]);
+                //printf("in if\n");
+            result[index_pt] -= raw_compressed[i];
+            for (unsigned long j = 0; j < raw_compressed[i]; j++){//ajoute le nombre de valeur necessaire
+                result[empty_pt++] = raw_compressed[i+1];
+            }
+            
+        }else{// nouvelle valeur a reduire
+            //printf("getting new\n");
+            index_pt = empty_pt++; // index_pt recoit un emplace vide
+            result[index_pt] = raw_compressed[i] * -1; //flip du compteur
+            for (unsigned long j = 0; j < raw_compressed[i]; j++){//ajoute le nombre de valeur necessaire
+                result[empty_pt++] = raw_compressed[i+1];
+            }
+        }
+
+    }
+    
+    // affiche le contenue apres reduction
+    printf("After compression : empty_pt = %ld\n[", empty_pt);
+    //printf("After compression : index_pt = %ld\n[ ", index_pt);
+    for (unsigned long i = 0; i < empty_pt; i++)
+    {
+        printf("%hi ", result[i]);
+    }
+    printf(" ]\n ****************************************\n");
+
+    free(raw_compressed); // libere la memoire de la compression brute
+    //reduction de l'espace memoire
+    //result = (GLbyte*) realloc(result, empty_pt * sizeof(GLbyte));
+
+    *size = empty_pt; 
+    return result;
 
 }
 
+unsigned long compress_GLshort(GLshort * data, GLshort * storage, unsigned long size){
+    unsigned long k = 0;
+    GLushort buffer = data[0];
+    GLshort counter =0;
+    for (unsigned long i = 0; i < size; i++)
+        {
+            printf("%hhu, ", data[i]);
+            if(buffer == data[i]){//si suite de valeur identique
+                if(counter < 32767){
+                    counter++;
+                }else{
+                    printf("<limit counter, push up new> ");
+                    storage[k++] = counter; 
+                    storage[k++] = buffer;
+                    counter = 1;
+                }
+            //    printf(">i=%ld : same\n", i);
+            }else{ // sinon 
+            //    printf(">i=%ld : not same\n", i);
+                //sauvegarde dans storage
+                storage[k++] = counter; 
+                storage[k++] = buffer;
+                //reaffectation du nouveau buffer de test
+                counter = 1;
+                buffer = data[i];
+            }
+        }
+
+        storage[k++] = counter; 
+        storage[k++] = buffer;
+
+    return k;
+}
+
 void compress_SV(Image_HSV img, Image_HSV_compressed *dst, int type){
-    GLbyte * tmp_storage = malloc( img.sizeX * img.sizeY * 2 * sizeof(GLbyte)); // compression brute, la pire cas possible est un dedoublement de memoire
+    GLbyte * tmp_storage = malloc( img.sizeX * img.sizeY * 2 * sizeof(tmp_storage)); // compression brute, la pire cas possible est un dedoublement de memoire
     assert(tmp_storage);
     unsigned long k = compress_GLubyte(img.SVdata[type], tmp_storage, SV, img.sizeX * img.sizeY, T_HSV);
 
     tmp_storage = reduce_raw_compressed(tmp_storage, &k);
-    dst->SVdata[type] = tmp_storage;
+    dst->SVdata[type] = (GLubyte*)tmp_storage;
     dst->sizeChannel[type] = k;
+}
+
+void compress_H(Image_HSV img, Image_HSV_compressed *dst){
+    GLshort * tmp_storage = malloc( img.sizeX * img.sizeY * 2 * sizeof(GLshort));
+    assert(tmp_storage);
+    unsigned long k = compress_GLshort(img.Hdata, tmp_storage, img.sizeX * img.sizeY);
+    printf(">>\n");
+    for (size_t i = 0; i < k; i++)
+    {
+        printf("%hi ",tmp_storage[i]);
+    }
+    tmp_storage = reduce_raw_compressed_hue(tmp_storage,&k);
+    dst->Hdata = tmp_storage;
+    dst->sizeChannel[2] = k;
 }
 
 Image_HSV_compressed create_compressed_image_from_HSV(Image_HSV img){
@@ -276,10 +373,11 @@ Image_HSV_compressed create_compressed_image_from_HSV(Image_HSV img){
     assert(result.sizeChannel);
     result.SVdata = malloc(2 * sizeof( result.SVdata));
     assert(result.SVdata);
+    compress_H(img, &result);
     compress_SV(img, &result, S);
     compress_SV(img, &result, V);
 
 
-
+    return result;
 
 }
