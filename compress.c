@@ -16,11 +16,11 @@ void print_image(Image img){
     
 }
 
-unsigned long compress_GLubyte(GLubyte * data, GLbyte * storage, int type, unsigned long size){
+unsigned long compress_GLubyte(GLubyte * data, GLbyte * storage, int type, unsigned long size, unsigned long img_type){
     GLubyte buffer = data[type];
     GLbyte counter =0;
     unsigned long k = 0;
-    for (unsigned long i = type; i < size * 3; i+=3)
+    for (unsigned long i = type; i < size * img_type; i+=img_type)
         {
             printf("%hhu, ", data[i]);
             if(buffer == data[i]){//si suite de valeur identique
@@ -57,15 +57,17 @@ unsigned long compress_RGB(Image img, Image_RGB_compressed* dst, int color){
     
     GLbyte * tmp_storage = malloc( img.sizeX * img.sizeY * 2 * sizeof(GLbyte)); // compression brute, la pire cas possible est un dedoublement de memoire
     assert(tmp_storage);
-    unsigned long k = compress_GLubyte(img.data, tmp_storage, color, img.sizeX * img.sizeY);
+    unsigned long k = compress_GLubyte(img.data, tmp_storage, color, img.sizeX * img.sizeY, T_RGB);
     
     // affiche le contenue de tmp_storage
+    /*
     printf("\n>>>k = %ld\n[ ", k);
     for (size_t i = 0; i < k; i++)
     {
         printf("%hhu ",tmp_storage[i]);
     }
     printf(" ]\n  ========================= \n");
+    */
 
     //reduit le resultat brute via la methode SGI
     tmp_storage = reduce_raw_compressed(tmp_storage, &k);
@@ -256,6 +258,16 @@ unsigned long compress_Hue(Image_HSV img, Image_HSV_compressed dst){
 
 }
 
+void compress_SV(Image_HSV img, Image_HSV_compressed *dst, int type){
+    GLbyte * tmp_storage = malloc( img.sizeX * img.sizeY * 2 * sizeof(GLbyte)); // compression brute, la pire cas possible est un dedoublement de memoire
+    assert(tmp_storage);
+    unsigned long k = compress_GLubyte(img.SVdata[type], tmp_storage, SV, img.sizeX * img.sizeY, T_HSV);
+
+    tmp_storage = reduce_raw_compressed(tmp_storage, &k);
+    dst->SVdata[type] = tmp_storage;
+    dst->sizeChannel[type] = k;
+}
+
 Image_HSV_compressed create_compressed_image_from_HSV(Image_HSV img){
     Image_HSV_compressed result;
     result.sizeX = img.sizeX;
@@ -264,6 +276,8 @@ Image_HSV_compressed create_compressed_image_from_HSV(Image_HSV img){
     assert(result.sizeChannel);
     result.SVdata = malloc(2 * sizeof( result.SVdata));
     assert(result.SVdata);
+    compress_SV(img, &result, S);
+    compress_SV(img, &result, V);
 
 
 

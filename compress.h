@@ -8,6 +8,10 @@
 #define BLUE 2
 #define S 0
 #define V 1
+#define SV 0
+
+#define T_RGB 3
+#define T_HSV 1
 
 struct Image_RGB_compressed
 {
@@ -52,5 +56,7 @@ void rgb_to_hsv(GLubyte r, GLubyte g, GLubyte b, short * h, GLubyte * s, GLubyte
 Image_HSV conv_RGB_img_to_HSV_img(Image src);
 void conv_RGB_HSV(Image src, Image_HSV dst);
 Image_HSV_compressed create_compressed_image_from_HSV(Image_HSV img);
+unsigned long compress_Hue(Image_HSV img, Image_HSV_compressed dst);
+void compress_SV(Image_HSV img, Image_HSV_compressed * dst, int type);
 
 #endif
