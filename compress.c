@@ -352,37 +352,36 @@ Image_HSV_compressed create_compressed_image_from_HSV(Image_HSV img){
 
 void decompress_GLubytes(GLubyte * src, GLubyte * dst, unsigned int size_src, int pos){
     unsigned int j = 0;
+    /*
     printf("======starting\n");
-    
     for (size_t i = 0; i < size_src; i+=2)
     {
         printf("%hhi %hhu ", src[i], src[i+1]);
     }
     printf("\n");
-    
+    */
     GLbyte iter_buffer;
     GLubyte value_buffer;
     unsigned long size_counter = 0;
     while (j < size_src){
         iter_buffer = src[j];
-        printf("iter_buffer = %hhi\n", iter_buffer);
+        //printf("iter_buffer = %hhi\n", iter_buffer);
         if(iter_buffer > 0){//cas repetition simple
-            printf("iter case\n");
+            //printf("positive case\n");
             value_buffer = src[j+1];
-            printf("value_buffer = %hhu\n", value_buffer);  
             for (GLbyte k = 0; k < iter_buffer; k++){
-                printf(" pos = %ld, \n" ,size_counter *3 + pos );
+                //printf("value_buffer = %hhu ,pos = %ld\n",value_buffer,size_counter *3 + pos );
                 dst[size_counter++ * 3 + pos] = value_buffer;
             }
             j+=2;
 
         }else{ //cas repetition negative
-            printf("negative case\n");
+            //printf("negative case\n");
             iter_buffer = iter_buffer * -1;
+
             for (GLbyte k = 0; k < iter_buffer; k++){
                 value_buffer = src[++j];
-                printf("%hhu %hhu | %hhi", value_buffer, iter_buffer, iter_buffer);
-                printf("pos = %ld, \n" ,size_counter *3 + pos );
+                //printf("value_buffer = %hhu ,pos = %ld\n",value_buffer,size_counter *3 + pos );
                 dst[size_counter++ * 3 + pos] = value_buffer;
             }
             j++;
@@ -557,7 +556,6 @@ int Image_load(char *filename, Image *img){
         decompress_RGB(img_buffer, img);
 
         printf("%lu %lu %lu\n", img_buffer->ChannelSize[RED], img_buffer->ChannelSize[GREEN], img_buffer->ChannelSize[BLUE]);
-        exit(0);
 
     }
 
