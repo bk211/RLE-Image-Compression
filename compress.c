@@ -57,7 +57,7 @@ unsigned long compress_RGB(Image img, Image_RGB_compressed* dst, int color){
     
     GLbyte * tmp_storage = malloc( img.sizeX * img.sizeY * 2 * sizeof(GLbyte)); // compression brute, la pire cas possible est un dedoublement de memoire
     assert(tmp_storage);
-    unsigned long k = compress_GLubyte(img.data, tmp_storage, color, img.sizeX * img.sizeY, T_RGB);
+    unsigned long k = compress_GLubyte(img.data, tmp_storage, color, img.sizeX * img.sizeY, STEP_RGB);
     
     // affiche le contenue de tmp_storage
     /*
@@ -343,7 +343,7 @@ unsigned long compress_GLshort(GLshort * data, GLshort * storage, unsigned long 
 void compress_SV(Image_HSV img, Image_HSV_compressed *dst, int type){
     GLbyte * tmp_storage = malloc( img.sizeX * img.sizeY * 2 * sizeof(tmp_storage)); // compression brute, la pire cas possible est un dedoublement de memoire
     assert(tmp_storage);
-    unsigned long k = compress_GLubyte(img.SVdata[type], tmp_storage, SV, img.sizeX * img.sizeY, T_HSV);
+    unsigned long k = compress_GLubyte(img.SVdata[type], tmp_storage, SV, img.sizeX * img.sizeY, STEP_HSV);
 
     tmp_storage = reduce_raw_compressed(tmp_storage, &k);
     dst->SVdata[type] = (GLubyte*)tmp_storage;
@@ -379,6 +379,35 @@ Image_HSV_compressed create_compressed_image_from_HSV(Image_HSV img){
 
     return result;
 
+}
+
+void decompress_GLubytes(GLubyte * src, GLubyte * dst, unsigned int size_src, int pos){
+    int j = 0;
+    GLbyte iter_buffer;
+    GLubyte value_buffer;
+    size_t size_counter = 0;
+    while (j < size_src)
+        {
+            iter_buffer = src[j];
+            //printf("iter_buffer = %hhi\n", iter_buffer);
+            if(iter_buffer > 0){//cas repetition simple
+                //printf("iter case\n");
+                value_buffer = src[j+1];
+                for (GLbyte k = 0; k < iter_buffer; k++)
+                {
+                    //printf("%hhu ", value_buffer);
+                    //printf(">%ld, \n" ,size_counter *3 + pos );
+                    dst[size_counter++ * 3 + pos] = value_buffer;
+                }
+                j+=2;
+            }else{ // cas repetition negative
+                //printf("negative case\n");
+                for (GLbyte k = 0; k > iter_buffer; k++){
+                    value_buffer = src[++j];
+                    dst[size_counter++ * 3 + pos] = value_buffer;
+                }
+            }
+        }
 }
 
 
