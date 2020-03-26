@@ -10,8 +10,8 @@
 #define V 1
 #define SV 0
 
-#define T_RGB 3
-#define T_HSV 1
+#define STEP_RGB 3
+#define STEP_HSV 1
 
 struct Image_RGB_compressed
 {

@@ -22,12 +22,12 @@ unsigned long compress_GLubyte(GLubyte * data, GLbyte * storage, int type, unsig
     unsigned long k = 0;
     for (unsigned long i = type; i < size * img_type; i+=img_type)
         {
-            printf("%hhu, ", data[i]);
+            //printf("%hhu, ", data[i]);
             if(buffer == data[i]){//si suite de valeur identique
                 if(counter < 127){
                     counter++;
                 }else{
-                    printf("<limit counter, push up new> ");
+                    //printf("<limit counter, push up new> ");
                     storage[k++] = counter; 
                     storage[k++] = buffer;
                     counter = 1;
@@ -114,15 +114,16 @@ GLbyte * reduce_raw_compressed(GLbyte* raw_compressed, unsigned long * size){
     }
     
     // affiche le contenue apres reduction
-    printf("After compression : empty_pt = %ld\n[", empty_pt);
+    /*printf("After compression : empty_pt = %ld\n[", empty_pt);
     //printf("After compression : index_pt = %ld\n[ ", index_pt);
     for (unsigned long i = 0; i < empty_pt; i++)
     {
         printf("%hhi ", result[i]);
     }
     printf(" ]\n ****************************************\n");
+    */
 
-    free(raw_compressed); // libere la memoire de la compression brute
+    //free(raw_compressed); // libere la memoire de la compression brute
     //reduction de l'espace memoire
     //result = (GLbyte*) realloc(result, empty_pt * sizeof(GLbyte));
 
@@ -229,9 +230,13 @@ Image_HSV conv_RGB_img_to_HSV_img(Image src){
     result.sizeX = src.sizeX;
     result.sizeY = src.sizeY;
     result.Hdata = malloc( result.sizeX * result.sizeY * sizeof(result.Hdata));
+    assert(result.Hdata);
     result.SVdata = malloc( 2 * sizeof(result.SVdata));    
+    assert(result.SVdata);
     result.SVdata[S] = malloc( result.sizeX * result.sizeY * sizeof(result.SVdata[S]));
+    assert(result.SVdata[S]);
     result.SVdata[V] = malloc( result.sizeX * result.sizeY * sizeof(result.SVdata[V]));
+    assert(result.SVdata[V]);
     conv_RGB_HSV(src, result);
     return result;
 }
@@ -289,22 +294,22 @@ GLshort * reduce_raw_compressed_hue(GLshort* raw_compressed, unsigned long * siz
     }
     
     // affiche le contenue apres reduction
-    printf("After compression : empty_pt = %ld\n[", empty_pt);
+    //printf("After compression : empty_pt = %ld\n[", empty_pt);
     //printf("After compression : index_pt = %ld\n[ ", index_pt);
-    for (unsigned long i = 0; i < empty_pt; i++)
+/*    for (unsigned long i = 0; i < empty_pt; i++)
     {
         printf("%hi ", result[i]);
     }
     printf(" ]\n ****************************************\n");
-
-    free(raw_compressed); // libere la memoire de la compression brute
+*/
+    //free(raw_compressed); // libere la memoire de la compression brute
     //reduction de l'espace memoire
     //result = (GLbyte*) realloc(result, empty_pt * sizeof(GLbyte));
 
     *size = empty_pt; 
     return result;
 
-}
+} 
 
 unsigned long compress_GLshort(GLshort * data, GLshort * storage, unsigned long size){
     unsigned long k = 0;
@@ -312,12 +317,12 @@ unsigned long compress_GLshort(GLshort * data, GLshort * storage, unsigned long 
     GLshort counter =0;
     for (unsigned long i = 0; i < size; i++)
         {
-            printf("%hhu, ", data[i]);
+            //printf("%hhu, ", data[i]);
             if(buffer == data[i]){//si suite de valeur identique
                 if(counter < 32767){
                     counter++;
                 }else{
-                    printf("<limit counter, push up new> ");
+                    //printf("<limit counter, push up new> ");
                     storage[k++] = counter; 
                     storage[k++] = buffer;
                     counter = 1;
@@ -354,7 +359,6 @@ void compress_H(Image_HSV img, Image_HSV_compressed *dst){
     GLshort * tmp_storage = malloc( img.sizeX * img.sizeY * 2 * sizeof(GLshort));
     assert(tmp_storage);
     unsigned long k = compress_GLshort(img.Hdata, tmp_storage, img.sizeX * img.sizeY);
-    printf(">>\n");
     for (size_t i = 0; i < k; i++)
     {
         printf("%hi ",tmp_storage[i]);
@@ -416,38 +420,9 @@ Image decompress_RGB(Image_RGB_compressed img){
     result.sizeX = img.sizeX;
     result.sizeY = img.sizeY;
     result.data = malloc( result.sizeX * result.sizeY * 3 * sizeof(GLubyte));
-
-    size_t j;
-    GLbyte iter_buffer;
-    GLubyte value_buffer;
-    size_t size_counter;
-    for (size_t i = 0; i < 3; i++){// iteration sur les 3 champs rgb
-        unsigned long channel_size = img.sizeChannel[i];//obtiens la taille compresse'
-        j = 0;
-        size_counter = 0;
-        while (j < channel_size)
-        {
-            iter_buffer = img.data[i][j];
-            //printf("iter_buffer = %hhi\n", iter_buffer);
-            if(iter_buffer > 0){//cas repetition simple
-                //printf("iter case\n");
-                value_buffer = img.data[i][j+1];
-                for (GLbyte k = 0; k < iter_buffer; k++)
-                {
-                    //printf("%hhu ", value_buffer);
-                    //printf(">%ld, \n" ,size_counter *3 + i );
-                    result.data[size_counter++ * 3 + i] = value_buffer;
-                }
-                j+=2;
-            }else{ // cas repetition negative
-                //printf("negative case\n");
-                for (GLbyte k = 0; k > iter_buffer; k++){
-                    value_buffer = img.data[i][++j];
-                    result.data[size_counter++ * 3 + i] = value_buffer;
-                }
-            }
-        }
+    assert(result.data);
+    for (int i = 0; i < 3; i++){// iteration sur les 3 champs rgb
+        decompress_GLubytes(img.data[i], result.data, img.sizeChannel[i], i);    
     }
-
     return result;
 }

@@ -8,6 +8,7 @@
 
 Image *image;
 Image_RGB_compressed foo;
+Image *decomp;
 
 
 #define ESCAPE 27
@@ -96,11 +97,10 @@ void menuFunc(int item) {
     exit(0);
     break;
   case 1:
-    //foo = compress(*image);
-    //save_compressed_image("Patate.ppm",&foo);
+    printf("clicked\n");
     break;
   case 2:
-    printf("Entrer le nom pour l'image dans cette taille\n");
+    printf("Entrer le nom pour l'image dans cette taille\n");    
     scanf("%s", &s[0]);
     imagesave_PPM(s, image);
     break;
