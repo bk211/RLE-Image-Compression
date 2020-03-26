@@ -172,7 +172,6 @@ void save_compressed_image(char * filename, Image_RGB_compressed * img){
     fclose(fp);
 }
 
-//Image decompress_RGB(Image_compressed img){}
 
 void rgb_to_hsv(GLubyte r, GLubyte g, GLubyte b, short * h, GLubyte * s, GLubyte * v){
     //printf("\nR = %hhu, G = %hhu, B = %hhu\n", r,g,b);
@@ -380,4 +379,46 @@ Image_HSV_compressed create_compressed_image_from_HSV(Image_HSV img){
 
     return result;
 
+}
+
+
+Image decompress_RGB(Image_RGB_compressed img){
+    Image result;
+    result.sizeX = img.sizeX;
+    result.sizeY = img.sizeY;
+    result.data = malloc( result.sizeX * result.sizeY * 3 * sizeof(GLubyte));
+
+    size_t j;
+    GLbyte iter_buffer;
+    GLubyte value_buffer;
+    size_t size_counter;
+    for (size_t i = 0; i < 3; i++){// iteration sur les 3 champs rgb
+        unsigned long channel_size = img.sizeChannel[i];//obtiens la taille compresse'
+        j = 0;
+        size_counter = 0;
+        while (j < channel_size)
+        {
+            iter_buffer = img.data[i][j];
+            //printf("iter_buffer = %hhi\n", iter_buffer);
+            if(iter_buffer > 0){//cas repetition simple
+                //printf("iter case\n");
+                value_buffer = img.data[i][j+1];
+                for (GLbyte k = 0; k < iter_buffer; k++)
+                {
+                    //printf("%hhu ", value_buffer);
+                    //printf(">%ld, \n" ,size_counter *3 + i );
+                    result.data[size_counter++ * 3 + i] = value_buffer;
+                }
+                j+=2;
+            }else{ // cas repetition negative
+                //printf("negative case\n");
+                for (GLbyte k = 0; k > iter_buffer; k++){
+                    value_buffer = img.data[i][++j];
+                    result.data[size_counter++ * 3 + i] = value_buffer;
+                }
+            }
+        }
+    }
+
+    return result;
 }

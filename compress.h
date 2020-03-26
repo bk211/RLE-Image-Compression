@@ -59,4 +59,6 @@ void conv_RGB_HSV(Image src, Image_HSV dst);
 Image_HSV_compressed create_compressed_image_from_HSV(Image_HSV img);
 void compress_H(Image_HSV img, Image_HSV_compressed *dst);
 void compress_SV(Image_HSV img, Image_HSV_compressed * dst, int type);
+Image decompress_RGB(Image_RGB_compressed img);
+
 #endif

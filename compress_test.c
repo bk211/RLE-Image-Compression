@@ -93,13 +93,13 @@ int main(int argc, char const *argv[])
     
     Image test_image = gen_test_image(1);
     print_image(test_image);
-    Image_HSV bar = conv_RGB_img_to_HSV_img(test_image);
+    /*Image_HSV bar = conv_RGB_img_to_HSV_img(test_image);
     
     for (size_t i = 0; i < bar.sizeX * bar.sizeY; i++){
         printf("%hi %hhu %hhu \n", bar.Hdata[i],bar.SVdata[S][i], bar.SVdata[V][i]);
-    }
+    }*/
     
-    Image_HSV_compressed compbar = create_compressed_image_from_HSV(bar);
+    //Image_HSV_compressed compbar = create_compressed_image_from_HSV(bar);
 
     //short tmp_h;
     //GLubyte tmp_s;
@@ -117,8 +117,9 @@ int main(int argc, char const *argv[])
 
     //test compression et sauvegarde
     
-    //Image_RGB_compressed foo = create_compressed_image_from_RGB(test_image);
-    
+    Image_RGB_compressed foo = create_compressed_image_from_RGB(test_image);
+    Image kk = decompress_RGB(foo);
+    print_image(kk);
     //save_compressed_image("Patate.ppm",&foo);
     
 
