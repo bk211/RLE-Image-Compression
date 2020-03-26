@@ -1,14 +1,14 @@
 #include <unistd.h>     
 #include <math.h>
-#include "ima.h"
 #include "compress.h"
 
 #include <GL/glut.h>
 #include <GL/glu.h>	
 
 Image *image;
-Image_RGB_compressed foo;
+Image_RGB_compressed *foo;
 Image *decomp;
+int compressed = 0;
 
 
 #define ESCAPE 27
@@ -39,11 +39,13 @@ void Mouse(int button, int state, int x, int y) {
 int Init(char *s) {
 
   image = (Image *) malloc(sizeof(Image));
+  foo = (Image_RGB_compressed *) malloc(sizeof(Image_RGB_compressed));
+  
   if (image == NULL) {
     fprintf(stderr, "Out of memory\n");
     return(-1);
   }
-  if (ImageLoad_PPM(s, image)==-1) 
+  if (Image_load(s, image)==-1) 
 	return(-1);
   printf("tailles %d %d\n",(int) image->sizeX, (int) image->sizeY);
 
@@ -94,10 +96,13 @@ void menuFunc(int item) {
   switch(item){
   case 0:
     free(image);
+    free(foo);
     exit(0);
     break;
   case 1:
-    printf("clicked\n");
+    printf("Compression en cours...\n");
+    compressed = create_compressed_image_from_RGB(image, foo);
+    printf("Fin de la compression \n");
     break;
   case 2:
     printf("Entrer le nom pour l'image dans cette taille\n");    
@@ -106,6 +111,18 @@ void menuFunc(int item) {
     break;
   case 3:
     printf("Taille de l image : %d %d\n", (int) image->sizeX, (int) image->sizeY);
+    break;
+  case 4:
+    if (compressed == 1)
+    {
+      printf("Entrer le nom pour l'image dans cette taille\n");    
+      scanf("%s", &s[0]);
+      save_compressed_RGB_image(s,foo);
+      printf("save succes\n");
+    }else{
+      printf("Compressed image not found plz compress first\n");
+    }
+    
     break;
   default:
     break;
@@ -132,6 +149,8 @@ int main(int argc, char **argv) {
   glutAddMenuEntry("compress", 1);
   glutAddMenuEntry("Sauver", 2);
   glutAddMenuEntry("Informations", 3);
+  glutAddMenuEntry("Sauver la compression", 4);
+  
   glutAttachMenu(GLUT_LEFT_BUTTON);
 
   glutDisplayFunc(Display);  

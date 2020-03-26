@@ -88,6 +88,8 @@ int ImageLoad_PPM(char *filename, Image *img)
     fclose(fp);
     return 1;
 }
+
+
 void imagesave_PPM(char *filename, Image *img)
 {
     FILE *fp;

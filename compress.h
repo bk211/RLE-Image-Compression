@@ -17,7 +17,7 @@ struct Image_RGB_compressed
 {
     unsigned long sizeX;
     unsigned long sizeY;
-    unsigned long * sizeChannel;
+    unsigned long * ChannelSize;
     GLubyte **data;
 };
 typedef struct Image_RGB_compressed Image_RGB_compressed;
@@ -35,7 +35,7 @@ struct Image_HSV_compressed
 {
     unsigned long sizeX;
     unsigned long sizeY;
-    unsigned long * sizeChannel;
+    unsigned long * ChannelSize;
     GLshort * Hdata;
     GLubyte **SVdata;
 };
@@ -46,9 +46,9 @@ unsigned long compress_RGB(Image img, Image_RGB_compressed * dst, int color);
 GLbyte * reduce_raw_compressed(GLbyte* raw_compressed, unsigned long *size);
 
 
-Image_RGB_compressed create_compressed_image_from_RGB(Image img);
+int create_compressed_image_from_RGB(Image *img, Image_RGB_compressed *result);
 
-void save_compressed_image(char * filename,Image_RGB_compressed * img);
+void save_compressed_RGB_image(char * filename,Image_RGB_compressed * img);
 unsigned long compress_GLubyte(GLubyte * data, GLbyte * storage, int type, unsigned long size, unsigned long img_type);
 unsigned long compress_GLshort(GLshort * data, GLshort * storage, unsigned long size);
 
@@ -59,6 +59,6 @@ void conv_RGB_HSV(Image src, Image_HSV dst);
 Image_HSV_compressed create_compressed_image_from_HSV(Image_HSV img);
 void compress_H(Image_HSV img, Image_HSV_compressed *dst);
 void compress_SV(Image_HSV img, Image_HSV_compressed * dst, int type);
-Image decompress_RGB(Image_RGB_compressed img);
-
+void decompress_RGB(Image_RGB_compressed *img, Image * result);
+int Image_load(char *filename, Image *img);
 #endif

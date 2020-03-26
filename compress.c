@@ -140,40 +140,6 @@ double min3(double x, double y, double z){
     return x < y? (x < z? x : z) : (y < z ? y : z);
 }
 
-
-
-
-void save_compressed_image(char * filename, Image_RGB_compressed * img){
-    FILE *fp;
-    //open file for output
-    fp = fopen(filename, "wb");
-    if (!fp) {
-         fprintf(stderr, "Unable to open file '%s'\n", filename);
-         exit(1);
-    }
-
-    //write the header file
-    //image format
-    fprintf(fp, "P6\n");
-
-    //comments
-    fprintf(fp, "# Created by %s\n","CC");
-
-    //image size
-    fprintf(fp, "%lu %lu\n",img->sizeX,img->sizeY);
-
-    // rgb component depth
-    fprintf(fp, "%d\n",255);
-    //fprintf(fp, "%d\n",RGB_COMPONENT_COLOR);
-
-    // pixel data
-    fwrite(img->data[RED], (size_t) 1, (size_t) img->sizeChannel[RED], fp);
-    fwrite(img->data[GREEN], (size_t) 1, (size_t) img->sizeChannel[GREEN], fp);
-    fwrite(img->data[BLUE], (size_t) 1, (size_t) img->sizeChannel[BLUE], fp);
-    fclose(fp);
-}
-
-
 void rgb_to_hsv(GLubyte r, GLubyte g, GLubyte b, short * h, GLubyte * s, GLubyte * v){
     //printf("\nR = %hhu, G = %hhu, B = %hhu\n", r,g,b);
     double R = r / 255.0 , G = g / 255.0 , B = b / 255.0;
@@ -242,18 +208,17 @@ Image_HSV conv_RGB_img_to_HSV_img(Image src){
 }
 
 
-Image_RGB_compressed create_compressed_image_from_RGB(Image img){
-    Image_RGB_compressed result;
-    result.sizeX = img.sizeX;
-    result.sizeY = img.sizeY;
-    result.data = malloc( 3 * sizeof( result.data) ); // 3 ptr vers 3 tableau de donner non alloue
-    assert(result.data);
-    result.sizeChannel = malloc( 3 * sizeof( result.sizeChannel));// tableau de 3 size rgb
-    assert(result.sizeChannel);
-    result.sizeChannel[RED] = compress_RGB(img, &result, RED);
-    result.sizeChannel[GREEN] = compress_RGB(img, &result, GREEN);
-    result.sizeChannel[BLUE] = compress_RGB(img, &result, BLUE);
-    return result;
+int create_compressed_image_from_RGB(Image *img, Image_RGB_compressed *result){
+    result->sizeX = img->sizeX;
+    result->sizeY = img->sizeY;
+    result->data = malloc( 3 * sizeof( result->data) ); // 3 ptr vers 3 tableau de donner non alloue
+    assert(result->data);
+    result->ChannelSize = malloc( 3 * sizeof( result->ChannelSize));// tableau de 3 size rgb
+    assert(result->ChannelSize);
+    result->ChannelSize[RED] = compress_RGB(*img, result, RED);
+    result->ChannelSize[GREEN] = compress_RGB(*img, result, GREEN);
+    result->ChannelSize[BLUE] = compress_RGB(*img, result, BLUE);
+    return 1;
 }
 
 
@@ -352,7 +317,7 @@ void compress_SV(Image_HSV img, Image_HSV_compressed *dst, int type){
 
     tmp_storage = reduce_raw_compressed(tmp_storage, &k);
     dst->SVdata[type] = (GLubyte*)tmp_storage;
-    dst->sizeChannel[type] = k;
+    dst->ChannelSize[type] = k;
 }
 
 void compress_H(Image_HSV img, Image_HSV_compressed *dst){
@@ -365,15 +330,15 @@ void compress_H(Image_HSV img, Image_HSV_compressed *dst){
     }
     tmp_storage = reduce_raw_compressed_hue(tmp_storage,&k);
     dst->Hdata = tmp_storage;
-    dst->sizeChannel[2] = k;
+    dst->ChannelSize[2] = k;
 }
 
 Image_HSV_compressed create_compressed_image_from_HSV(Image_HSV img){
     Image_HSV_compressed result;
     result.sizeX = img.sizeX;
     result.sizeY = img.sizeY;
-    result.sizeChannel = malloc(3 * sizeof(result.sizeChannel)); // tableau de 3 size h+s+v
-    assert(result.sizeChannel);
+    result.ChannelSize = malloc(3 * sizeof(result.ChannelSize)); // tableau de 3 size h+s+v
+    assert(result.ChannelSize);
     result.SVdata = malloc(2 * sizeof( result.SVdata));
     assert(result.SVdata);
     compress_H(img, &result);
@@ -386,43 +351,207 @@ Image_HSV_compressed create_compressed_image_from_HSV(Image_HSV img){
 }
 
 void decompress_GLubytes(GLubyte * src, GLubyte * dst, unsigned int size_src, int pos){
-    int j = 0;
+    unsigned int j = 0;
+    printf("starting\n");
+    
     GLbyte iter_buffer;
     GLubyte value_buffer;
-    size_t size_counter = 0;
-    while (j < size_src)
-        {
-            iter_buffer = src[j];
-            //printf("iter_buffer = %hhi\n", iter_buffer);
-            if(iter_buffer > 0){//cas repetition simple
-                //printf("iter case\n");
-                value_buffer = src[j+1];
-                for (GLbyte k = 0; k < iter_buffer; k++)
-                {
-                    //printf("%hhu ", value_buffer);
-                    //printf(">%ld, \n" ,size_counter *3 + pos );
-                    dst[size_counter++ * 3 + pos] = value_buffer;
-                }
-                j+=2;
-            }else{ // cas repetition negative
-                //printf("negative case\n");
-                for (GLbyte k = 0; k > iter_buffer; k++){
-                    value_buffer = src[++j];
-                    dst[size_counter++ * 3 + pos] = value_buffer;
-                }
+    unsigned long size_counter = 0;
+    while (j < size_src){
+        iter_buffer = src[j];
+        printf("iter_buffer = %hhi\n", iter_buffer);
+        if(iter_buffer > 0){//cas repetition simple
+            printf("iter case\n");
+            value_buffer = src[j+1];
+            for (GLbyte k = 0; k < iter_buffer; k++){
+                printf("%hhu %hhu ", value_buffer, iter_buffer);
+                printf(">%ld, \n" ,size_counter *3 + pos );
+                dst[size_counter * 3 + pos] = value_buffer;
+                size_counter++;
+            }
+            j+=2;
+
+        }else{ //cas repetition negative
+            printf("negative case\n");
+            for (GLbyte k = 0; k > iter_buffer; k--){
+                value_buffer = src[++j];
+                dst[size_counter++ * 3 + pos] = value_buffer;
             }
         }
+
+    }
+    
 }
 
 
-Image decompress_RGB(Image_RGB_compressed img){
-    Image result;
-    result.sizeX = img.sizeX;
-    result.sizeY = img.sizeY;
-    result.data = malloc( result.sizeX * result.sizeY * 3 * sizeof(GLubyte));
-    assert(result.data);
+void decompress_RGB(Image_RGB_compressed *img, Image * result){
+    result->sizeX = img->sizeX;
+    result->sizeY = img->sizeY;
+    
+    result->data = malloc( result->sizeX * result->sizeY * 3 * sizeof(GLubyte));
+    assert(result->data);
+
     for (int i = 0; i < 3; i++){// iteration sur les 3 champs rgb
-        decompress_GLubytes(img.data[i], result.data, img.sizeChannel[i], i);    
+        decompress_GLubytes(img->data[i], result->data, img->ChannelSize[i], i);    
     }
-    return result;
+
+}
+
+void save_compressed_RGB_image(char * filename, Image_RGB_compressed * img){
+    FILE *fp;
+    //open file for output
+    fp = fopen(filename, "wb");
+    if (!fp) {
+         fprintf(stderr, "Unable to open file '%s'\n", filename);
+         exit(1);
+    }
+
+    //write the header file
+    //image format
+    fprintf(fp, "P7\n");
+
+    //comments
+    fprintf(fp, "# Created by %s\n","CC");
+
+    //image size
+    fprintf(fp, "%lu %lu\n",img->sizeX,img->sizeY);
+
+    // rgb component depth
+    fprintf(fp, "%d\n",255);
+    //fprintf(fp, "%d\n",RGB_COMPONENT_COLOR);
+
+    // channelSize
+    fprintf(fp, "%lu %lu %lu\n", img->ChannelSize[RED], img->ChannelSize[GREEN], img->ChannelSize[BLUE]);
+
+
+    // pixel data
+    fwrite(img->data[RED], (size_t) 1, (size_t) img->ChannelSize[RED], fp);
+    fwrite(img->data[GREEN], (size_t) 1, (size_t) img->ChannelSize[GREEN], fp);
+    fwrite(img->data[BLUE], (size_t) 1, (size_t) img->ChannelSize[BLUE], fp);
+    fclose(fp);
+}
+
+int Image_load(char *filename, Image *img){
+    char d, buff[16];
+        FILE *fp;
+        int b, c, rgb_comp_color, size, sizex, sizey;
+		GLubyte tmp, * ptrdeb, *ptrfin, *lastline;
+
+        //open PPM file for reading
+        fp = fopen(filename, "rb");
+        if (!fp) {
+            fprintf(stderr, "Unable to open file '%s'\n", filename);
+            exit(1);
+        }
+
+        //read image format
+        if (!fgets(buff, sizeof(buff), fp)) {
+            perror(filename);
+            exit(1);
+        }
+
+    //check the image format
+    if (buff[0] != 'P') {
+        fprintf(stderr, "Invalid image format (must be 'PX')\n");
+        exit(1);
+    }
+    if (buff[1] != '6' && buff[1] != '7' && buff[1] != '8' ) {
+        fprintf(stderr, "Invalid image format (must be 'P6/P7/P8')\n");
+        exit(1);
+    }
+
+    //check for comments
+    c = getc(fp);
+    while (c == '#') {
+	    while (getc(fp) != '\n')
+		    ;
+	    c = getc(fp);
+    }
+    ungetc(c, fp);
+    //read image size information
+    if (fscanf(fp, "%lu %lu", &img->sizeX, &img->sizeY) != 2) {
+        fprintf(stderr, "Invalid image size (error loading '%s')\n", filename);
+        exit(1);
+    }
+
+    //read rgb component
+    if (fscanf(fp, "%d", &rgb_comp_color) != 1) {
+        fprintf(stderr, "Invalid rgb component (error loading '%s')\n", filename);
+        exit(1);
+    }
+    fscanf(fp, "%c ", &d);
+    //check rgb component depth
+    if ( (buff[1] == '7' || buff[1] == '6') && rgb_comp_color!= 255) {
+        fprintf(stderr, "'%s' does not have 8-bits components\n", filename);
+        exit(1);
+    }							
+
+    if(buff[1] == '6'){//cas normal 
+        /* allocation memoire */
+	    size = img->sizeX * img->sizeY * 3;
+	    printf("Size image %lu %lu => %d\n", img->sizeX, img->sizeY, size);
+	    img->data = (GLubyte *) malloc ((size_t) size * sizeof (GLubyte));
+	    assert(img->data);
+
+        //read pixel data from file
+        if (fread(img->data, (size_t) 1, (size_t) size, fp) == 0) {
+            fprintf(stderr, "Error loading image '%s'\n", filename);
+	    	/*
+            exit(1);
+	    	*/
+        }
+	    /* remettre l image dans le bon sens */
+	    //	printf("debut %ld fin %ld\n", (int) img->data, (int) img->data + size);
+	    sizex = img->sizeX;
+	    sizey = img->sizeY;
+	    lastline = img->data + size - sizex * 3;
+	    for (b = 0; b < img->sizeY / 2; b++) {
+	        ptrdeb = img->data + b * sizex * 3;
+	        ptrfin = lastline - (b * sizex * 3);
+	    //	printf("%d => %ld %ld\n", b, (int) ptrdeb, (int) ptrfin);
+	        for (c = 0; c < 3 * sizex; c++) {
+	            tmp = *ptrdeb;
+	            *ptrdeb = *ptrfin;
+	            *ptrfin = tmp;
+	            ptrfin++;
+	            ptrdeb++;
+	        }		
+	    }
+    }else if(buff[1] == '7'){// cas RGB_compressed
+        /* allocation memoire */
+        Image_RGB_compressed *img_buffer = (Image_RGB_compressed*)malloc(sizeof(Image_HSV_compressed));
+        img_buffer->ChannelSize = (unsigned long *)malloc(3* sizeof(unsigned long));
+        assert(img_buffer->ChannelSize);
+        img_buffer->sizeX = img->sizeX;
+        img_buffer->sizeY = img->sizeY;
+
+        if (fscanf(fp, "%lu %lu %lu", &(img_buffer->ChannelSize[RED]), &(img_buffer->ChannelSize[GREEN]), &(img_buffer->ChannelSize[BLUE])) != 3) {
+            fprintf(stderr, "Invalid image channel size (error loading '%s')\n", filename);
+            exit(1);
+        }
+        
+        img_buffer->data = (GLubyte**)malloc( 3 * sizeof(GLubyte*));
+        assert(img_buffer->data);
+        
+        //read pixel data from file
+        for (int i = 0; i < 3; i++){
+            img_buffer->data[i]  = (GLubyte*)malloc(img_buffer->ChannelSize[i] * sizeof(GLubyte));
+            assert(img_buffer->data[i]);
+            if (fread(img_buffer->data[i], (size_t) 1, (size_t) img_buffer->ChannelSize[i], fp) == 0) {
+                fprintf(stderr, "Error loading image '%s'\n", filename);
+                exit(1);
+            }
+        
+        }
+
+        decompress_RGB(img_buffer, img);
+
+        printf("%lu %lu %lu\n", img_buffer->ChannelSize[RED], img_buffer->ChannelSize[GREEN], img_buffer->ChannelSize[BLUE]);
+        exit(0);
+
+    }
+
+    fclose(fp);
+    
+    return 1;
 }
