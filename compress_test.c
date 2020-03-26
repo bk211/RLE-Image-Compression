@@ -91,7 +91,7 @@ Image gen_test_image(int i){
 int main(int argc, char const *argv[])
 {
     
-    Image test_image = gen_test_image(1);
+    Image test_image = gen_test_image(0);
     print_image(test_image);
     /*Image_HSV bar = conv_RGB_img_to_HSV_img(test_image);
     
@@ -116,10 +116,12 @@ int main(int argc, char const *argv[])
     */
 
     //test compression et sauvegarde
-    /*
-    Image_RGB_compressed foo = create_compressed_image_from_RGB(test_image);
-    Image kk = decompress_RGB(foo);
-    print_image(kk);*/
+    
+    Image_RGB_compressed *foo = malloc(sizeof(Image_RGB_compressed));
+    create_compressed_image_from_RGB(&test_image, foo);
+    Image *kk = malloc(sizeof (Image));
+    decompress_RGB(foo, kk);
+    print_image(*kk);
     //save_compressed_image("Patate.ppm",&foo);
     
 

@@ -352,7 +352,13 @@ Image_HSV_compressed create_compressed_image_from_HSV(Image_HSV img){
 
 void decompress_GLubytes(GLubyte * src, GLubyte * dst, unsigned int size_src, int pos){
     unsigned int j = 0;
-    printf("starting\n");
+    printf("======starting\n");
+    
+    for (size_t i = 0; i < size_src; i+=2)
+    {
+        printf("%hhi %hhu ", src[i], src[i+1]);
+    }
+    printf("\n");
     
     GLbyte iter_buffer;
     GLubyte value_buffer;
@@ -363,20 +369,24 @@ void decompress_GLubytes(GLubyte * src, GLubyte * dst, unsigned int size_src, in
         if(iter_buffer > 0){//cas repetition simple
             printf("iter case\n");
             value_buffer = src[j+1];
+            printf("value_buffer = %hhu\n", value_buffer);  
             for (GLbyte k = 0; k < iter_buffer; k++){
-                printf("%hhu %hhu ", value_buffer, iter_buffer);
-                printf(">%ld, \n" ,size_counter *3 + pos );
-                dst[size_counter * 3 + pos] = value_buffer;
-                size_counter++;
+                printf(" pos = %ld, \n" ,size_counter *3 + pos );
+                dst[size_counter++ * 3 + pos] = value_buffer;
             }
             j+=2;
 
         }else{ //cas repetition negative
             printf("negative case\n");
-            for (GLbyte k = 0; k > iter_buffer; k--){
+            iter_buffer = iter_buffer * -1;
+            for (GLbyte k = 0; k < iter_buffer; k++){
                 value_buffer = src[++j];
+                printf("%hhu %hhu | %hhi", value_buffer, iter_buffer, iter_buffer);
+                printf("pos = %ld, \n" ,size_counter *3 + pos );
                 dst[size_counter++ * 3 + pos] = value_buffer;
             }
+            j++;
+                        
         }
 
     }
