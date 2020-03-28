@@ -2,4 +2,7 @@ Unsigned char / GLUBYTES
 [0] -> [127] -> [128] -> [129] -> [254] -> [255] -> [256 = 0] -> [257 = 1]
 Signed char / GLBYTES
 [0] -> [127] ->[-128] ->[-127] -> [-2]  -> [-1]  -> [0]       -> [1]
- 
+
+
+soit save compressed rgb 
+soit load i,age 

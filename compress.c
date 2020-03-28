@@ -397,6 +397,10 @@ void decompress_RGB(Image_RGB_compressed *img, Image * result){
     result->sizeX = img->sizeX;
     result->sizeY = img->sizeY;
     
+    //printf(">channels size: %lu %lu %lu\n", img->ChannelSize[RED], img->ChannelSize[GREEN], img->ChannelSize[BLUE]);
+    //printf("[%hhu %hhu]\n",img->data[0][0],img->data[0][1]);
+
+
     result->data = malloc( result->sizeX * result->sizeY * 3 * sizeof(GLubyte));
     assert(result->data);
 
@@ -432,32 +436,36 @@ void save_compressed_RGB_image(char * filename, Image_RGB_compressed * img){
     // channelSize
     fprintf(fp, "%lu %lu %lu\n", img->ChannelSize[RED], img->ChannelSize[GREEN], img->ChannelSize[BLUE]);
 
-
     // pixel data
-    fwrite(img->data[RED], (size_t) 1, (size_t) img->ChannelSize[RED], fp);
-    fwrite(img->data[GREEN], (size_t) 1, (size_t) img->ChannelSize[GREEN], fp);
-    fwrite(img->data[BLUE], (size_t) 1, (size_t) img->ChannelSize[BLUE], fp);
+    unsigned long c;
+    printf("\n");
+    c = fwrite(img->data[RED], (size_t) 1, (size_t) img->ChannelSize[RED], fp);
+    printf("writed c : %ld  | size : %ld\n", c, img->ChannelSize[RED]);
+    c = fwrite(img->data[GREEN], (size_t) 1, (size_t) img->ChannelSize[GREEN], fp);
+    printf("writed c : %ld  | size : %ld\n", c, img->ChannelSize[GREEN]);
+    c = fwrite(img->data[BLUE], (size_t) 1, (size_t) img->ChannelSize[BLUE], fp);
+    printf("writed c : %ld  | size : %ld\n", c, img->ChannelSize[BLUE]);
     fclose(fp);
 }
 
 int Image_load(char *filename, Image *img){
     char d, buff[16];
-        FILE *fp;
-        int b, c, rgb_comp_color, size, sizex, sizey;
-		GLubyte tmp, * ptrdeb, *ptrfin, *lastline;
+    FILE *fp;
+    int b, c, rgb_comp_color, size, sizex, sizey;
+	GLubyte tmp, * ptrdeb, *ptrfin, *lastline;
 
-        //open PPM file for reading
-        fp = fopen(filename, "rb");
-        if (!fp) {
-            fprintf(stderr, "Unable to open file '%s'\n", filename);
-            exit(1);
-        }
+    //open PPM file for reading
+    fp = fopen(filename, "rb");
+    if (!fp) {
+        fprintf(stderr, "Unable to open file '%s'\n", filename);
+        exit(1);
+    }
 
-        //read image format
-        if (!fgets(buff, sizeof(buff), fp)) {
-            perror(filename);
-            exit(1);
-        }
+    //read image format
+    if (!fgets(buff, sizeof(buff), fp)) {
+        perror(filename);
+        exit(1);
+    }
 
     //check the image format
     if (buff[0] != 'P') {
@@ -526,6 +534,7 @@ int Image_load(char *filename, Image *img){
 	            ptrdeb++;
 	        }		
 	    }
+
     }else if(buff[1] == '7'){// cas RGB_compressed
         /* allocation memoire */
         Image_RGB_compressed *img_buffer = (Image_RGB_compressed*)malloc(sizeof(Image_HSV_compressed));
@@ -538,25 +547,32 @@ int Image_load(char *filename, Image *img){
             fprintf(stderr, "Invalid image channel size (error loading '%s')\n", filename);
             exit(1);
         }
+        printf("channels size: %lu %lu %lu\n", img_buffer->ChannelSize[RED], img_buffer->ChannelSize[GREEN], img_buffer->ChannelSize[BLUE]);
         
-        img_buffer->data = (GLubyte**)malloc( 3 * sizeof(GLubyte*));
+        img_buffer->data = (GLubyte**)malloc(3 * sizeof(GLubyte*));
         assert(img_buffer->data);
-        
+        c = getc(fp);
         //read pixel data from file
         for (int i = 0; i < 3; i++){
             img_buffer->data[i]  = (GLubyte*)malloc(img_buffer->ChannelSize[i] * sizeof(GLubyte));
             assert(img_buffer->data[i]);
+            
             if (fread(img_buffer->data[i], (size_t) 1, (size_t) img_buffer->ChannelSize[i], fp) == 0) {
                 fprintf(stderr, "Error loading image '%s'\n", filename);
                 exit(1);
             }
-        
+            
+            
+            for (size_t j = 0; j < img_buffer->ChannelSize[i]; j++)
+            {
+                printf("%hhu ", img_buffer->data[i][j]);
+            }
+            printf("\n");
+            
         }
-
         decompress_RGB(img_buffer, img);
 
-        printf("%lu %lu %lu\n", img_buffer->ChannelSize[RED], img_buffer->ChannelSize[GREEN], img_buffer->ChannelSize[BLUE]);
-
+        
     }
 
     fclose(fp);

@@ -75,25 +75,121 @@ Image gen_test_image(int i){
         
         return foo;
     }
+    else if(i == 5){
+        foo.sizeX = 1024;
+        foo.sizeY = 768;
+        foo.data = malloc( foo.sizeX* foo.sizeY * 3 *sizeof(GLubyte));
+        for (size_t i = 0; i < foo.sizeX * foo.sizeY * 3 /2 ; i++)
+        {
+            foo.data[i] = 40;
+        }
+        for (size_t i = foo.sizeX * foo.sizeY * 3 / 2; i < foo.sizeX * foo.sizeY * 3; i++)
+        {
+            foo.data[i] = 200;
+        }
+        
+        return foo;
+    }else if(i == 6){
+        foo.sizeX = 200;
+        foo.sizeY = 100;
+        foo.data = malloc( foo.sizeX* foo.sizeY * 3 *sizeof(GLubyte));
+        for (size_t i = 0; i < foo.sizeX * foo.sizeY ; i++){
+            if(i % foo.sizeX < 100){
+
+                foo.data[i * 3 ] = 120;
+                foo.data[i * 3 +1] = 200;
+                foo.data[i * 3 +2] = 100;
+            }else{
+                foo.data[i * 3 ] = 255;
+                foo.data[i * 3 +1] = 0;
+                foo.data[i * 3 +2] = 100;
+            }
+        }
+
+        return foo;
+    }
     else{
         foo.sizeX = 1;
         foo.sizeY = 1;
         foo.data = malloc( foo.sizeX* foo.sizeY * 3 *sizeof(GLubyte));
-        foo.data[0] = 240;
-        foo.data[1] = 42;
-        foo.data[2] = 201;
+        foo.data[0] = 100;
+        foo.data[1] = 150;
+        foo.data[2] = 255;
         return foo;
     }
 
 }
 
+void imagesave_PPM(char *filename, Image *img)
+{
+    FILE *fp;
+    //open file for output
+    fp = fopen(filename, "wb");
+    if (!fp) {
+         fprintf(stderr, "Unable to open file '%s'\n", filename);
+         exit(1);
+    }
+
+    //write the header file
+    //image format
+    fprintf(fp, "P6\n");
+
+    //comments
+    fprintf(fp, "# Created by %s\n","CC");
+
+    //image size
+    fprintf(fp, "%lu %lu\n",img->sizeX,img->sizeY);
+
+    // rgb component depth
+    fprintf(fp, "%d\n",255);
+
+    // pixel data
+    fwrite(img->data, (size_t) 1, (size_t) (3 * img->sizeX * img->sizeY), fp);
+    fclose(fp);
+}
+
+
 
 int main(int argc, char const *argv[])
 {
     
-    Image test_image = gen_test_image(2);
-    print_image(test_image);
+    Image test_image = gen_test_image(6);
+    imagesave_PPM("normal.ppm",&test_image);
+    //print_image(test_image);
+    Image_RGB_compressed *t = malloc(sizeof(Image_RGB_compressed));
+    create_compressed_image_from_RGB(&test_image, t);
+    printf("SIZE: %ld %ld\n", t->sizeX, t->sizeY);
+    printf("SIZE C: %ld %ld %ld\n", t->ChannelSize[RED],t->ChannelSize[GREEN],t->ChannelSize[BLUE]);
+    for (size_t i = 0; i < t->ChannelSize[RED]; i++)
+    {
+        printf("%hhu ",t->data[RED][i]);
+    }
+    printf("\n");
+    for (size_t i = 0; i < t->ChannelSize[GREEN]; i++)
+    {
+        printf("%hhu ",t->data[GREEN][i]);
+    }
+    printf("\n");
+    for (size_t i = 0; i < t->ChannelSize[BLUE]; i++)
+    {
+        printf("%hhu ",t->data[BLUE][i]);
+    }
+
+    save_compressed_RGB_image("compressed.ppm", t);
+    Image *t3 = malloc(sizeof(Image));
+    Image_load("compressed.ppm", t3);
+
+    //print_image(*t3);
+
+    /*
+    Image *t2 = malloc(sizeof (Image));
+    decompress_RGB(t, t2);
+    imagesave_PPM("after_decomp.ppm",t2);
+    */
     
+ 
+ //   print_image(test_image);
+//    imagesave_PPM("normal.ppm", &test_image);
     /*Image_HSV bar = conv_RGB_img_to_HSV_img(test_image);
     
     for (size_t i = 0; i < bar.sizeX * bar.sizeY; i++){
@@ -117,14 +213,24 @@ int main(int argc, char const *argv[])
 
     //test compression et sauvegarde
     
+    /*
     Image_RGB_compressed *foo = malloc(sizeof(Image_RGB_compressed));
     create_compressed_image_from_RGB(&test_image, foo);
-    Image *kk = malloc(sizeof (Image));
+    save_compressed_RGB_image("test3.ppm",foo);
+    */
+    /*Image *kk = malloc(sizeof (Image));
     decompress_RGB(foo, kk);
     print_image(*kk);
-    //save_compressed_image("Patate.ppm",&foo);
+    */
+   
     
-
+    //imagesave_PPM("test5.ppm", kk);
+    //printf(">>\n");
+    //Image * tmpp = malloc(sizeof (Image));
+    //Image_load("test5.ppm", tmpp);
+    //printf("printing image\n");
+    //print_image(*tmpp);
+    
     // tests de limites et de conversion
     /*
     GLubyte a = 60;
