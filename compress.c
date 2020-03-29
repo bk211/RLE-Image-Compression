@@ -115,6 +115,7 @@ GLbyte * reduce_raw_compressed(GLbyte* raw_compressed, unsigned long * size){
     
     // affiche le contenue apres reduction
     
+    /*
     printf("After compression : empty_pt = %ld\n[", empty_pt);
     //printf("After compression : index_pt = %ld\n[ ", index_pt);
     for (unsigned long i = 0; i < empty_pt; i++)
@@ -122,7 +123,7 @@ GLbyte * reduce_raw_compressed(GLbyte* raw_compressed, unsigned long * size){
         printf("%hhi ", result[i]);
     }
     printf("]\n ****************************************\n");
-    
+    */
 
     //free(raw_compressed); // libere la memoire de la compression brute
     //reduction de l'espace memoire

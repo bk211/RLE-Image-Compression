@@ -40,7 +40,8 @@ int Init(char *s) {
 
   image = (Image *) malloc(sizeof(Image));
   foo = (Image_RGB_compressed *) malloc(sizeof(Image_RGB_compressed));
-  
+  decomp = malloc(sizeof(Image));
+
   if (image == NULL) {
     fprintf(stderr, "Out of memory\n");
     return(-1);
@@ -103,6 +104,11 @@ void menuFunc(int item) {
     printf("Compression en cours...\n");
     compressed = create_compressed_image_from_RGB(image, foo);
     printf("Fin de la compression \n");
+    
+    /*decompress_RGB(foo, decomp);
+    print_image(*decomp);*/
+    printf("end\n");
+
     break;
   case 2:
     printf("Entrer le nom pour l'image dans cette taille\n");    
