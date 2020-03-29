@@ -549,7 +549,7 @@ int Image_load(char *filename, Image *img){
             fprintf(stderr, "Invalid image channel size (error loading '%s')\n", filename);
             exit(1);
         }
-        printf("channels size: %lu %lu %lu\n", img_buffer->ChannelSize[RED], img_buffer->ChannelSize[GREEN], img_buffer->ChannelSize[BLUE]);
+        //printf("channels size: %lu %lu %lu\n", img_buffer->ChannelSize[RED], img_buffer->ChannelSize[GREEN], img_buffer->ChannelSize[BLUE]);
         
         img_buffer->data = (GLubyte**)malloc(3 * sizeof(GLubyte*));
         assert(img_buffer->data);
@@ -561,12 +561,13 @@ int Image_load(char *filename, Image *img){
         assert(img_buffer->data[GREEN]);
         assert(img_buffer->data[BLUE]);
         
-        //c = getc(fp);//saut pour passer le "line feed"
+        c = getc(fp);// Do not delete this line, mysterious bug
+
         if (fread(img_buffer->data[RED], (size_t) 1, (size_t) img_buffer->ChannelSize[RED], fp) == 0) {
             fprintf(stderr, "Error loading image '%s'\n", filename);
             exit(1);
         }
-        
+
         if (fread(img_buffer->data[GREEN], (size_t) 1, (size_t) img_buffer->ChannelSize[GREEN], fp) == 0) {
             fprintf(stderr, "Error loading image '%s'\n", filename);
             exit(1);
@@ -579,14 +580,15 @@ int Image_load(char *filename, Image *img){
         
         
         /*
+        printf("data:\n");
+        printf("RED:\n");
         for (size_t j = 0; j < img_buffer->ChannelSize[RED]; j++){printf("%hhi ", img_buffer->data[RED][j]);}
-        printf("\n");
+        printf("\nGREEN:\n");
         for (size_t j = 0; j < img_buffer->ChannelSize[GREEN]; j++){printf("%hhi ", img_buffer->data[GREEN][j]);}
-        printf("\n");
+        printf("\nBLUE:\n");
         for (size_t j = 0; j < img_buffer->ChannelSize[BLUE]; j++){printf("%hhi ", img_buffer->data[BLUE][j]);}
-        printf("\n");
-        */
-
+        printf("\n");*/
+        
         decompress_RGB(img_buffer, img);
 
         

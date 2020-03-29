@@ -28,19 +28,19 @@ Image gen_test_image(int i){
 
         foo.data[3] = 40;
         foo.data[4] = 60;
-        foo.data[5] = 50;
+        foo.data[5] = 200;
         
-        foo.data[6] = 40;
+        foo.data[6] = 200;
         foo.data[7] = 70;
         foo.data[8] = 60;
         
         foo.data[9] = 40;
-        foo.data[10] = 80;
+        foo.data[10] = 70;
         foo.data[11] = 60;
         
         foo.data[12] = 40;
         foo.data[13] = 90;
-        foo.data[14] = 50;
+        foo.data[14] = 60;
         
         return foo;
     }else if(i == 2){
@@ -152,31 +152,35 @@ void imagesave_PPM(char *filename, Image *img)
 
 int main(int argc, char const *argv[])
 {
-    /*
-    Image test_image = gen_test_image(6);
+    
+    Image test_image = gen_test_image(1);
     imagesave_PPM("normal.ppm",&test_image);
-    //print_image(test_image);
+    print_image(test_image);
+    
     Image_RGB_compressed *t = malloc(sizeof(Image_RGB_compressed));
+    
     create_compressed_image_from_RGB(&test_image, t);
     printf("SIZE: %ld %ld\n", t->sizeX, t->sizeY);
     printf("SIZE C: %ld %ld %ld\n", t->ChannelSize[RED],t->ChannelSize[GREEN],t->ChannelSize[BLUE]);
     for (size_t i = 0; i < t->ChannelSize[RED]; i++)
     {
-        printf("%hhu ",t->data[RED][i]);
+        printf("%hhi ",t->data[RED][i]);
     }
     printf("\n");
     for (size_t i = 0; i < t->ChannelSize[GREEN]; i++)
     {
-        printf("%hhu ",t->data[GREEN][i]);
+        printf("%hhi ",t->data[GREEN][i]);
     }
     printf("\n");
     for (size_t i = 0; i < t->ChannelSize[BLUE]; i++)
     {
-        printf("%hhu ",t->data[BLUE][i]);
+        printf("%hhi ",t->data[BLUE][i]);
     }
 
-    */
-    //save_compressed_RGB_image("compressed.ppm", t);
+    save_compressed_RGB_image("compressed.ppm", t);
+    Image *t6 = malloc(sizeof(Image));
+    Image_load("compressed.ppm", t6);
+    print_image(*t6);
 
 
     /* 
@@ -190,10 +194,12 @@ int main(int argc, char const *argv[])
 
     //printf("============================\n");
     
+    /*
     Image *t3 = malloc(sizeof(Image));
     Image_load("m.ppm", t3);
     printf("start image=============\n");
     print_image(*t3);
+    */
     
     //imagesave_PPM("after_getfp.ppm",t3);
 
