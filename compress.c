@@ -59,15 +59,14 @@ unsigned long compress_RGB(Image img, Image_RGB_compressed* dst, int color){
     assert(tmp_storage);
     unsigned long k = compress_GLubyte(img.data, tmp_storage, color, img.sizeX * img.sizeY, STEP_RGB);
     
-    // affiche le contenue de tmp_storage
+    // affiche le contenue de tmp_storage //premiere compression brute
     /*
     printf("\n>>>k = %ld\n[ ", k);
-    for (size_t i = 0; i < k; i++)
-    {
+    for (size_t i = 0; i < k; i++){
         printf("%hhu ",tmp_storage[i]);
     }
     printf(" ]\n  ========================= \n");
-    */
+    */    
 
     //reduit le resultat brute via la methode SGI
     tmp_storage = reduce_raw_compressed(tmp_storage, &k);
@@ -81,29 +80,30 @@ GLbyte * reduce_raw_compressed(GLbyte* raw_compressed, unsigned long * size){
     
     GLbyte * result = malloc( *size * sizeof(GLbyte));
     assert(result);
+    result[0] = 0;
 
     unsigned long empty_pt = 0, index_pt = 0;
     //printf("start compressing\n");
     for (unsigned long i = 0; i < *size; i+=2)//itere sur les indices de repetition de raw_compressed
     {   
-        //printf(">>%hhi\n ",raw_compressed[i]);
+        //printf("i = %ld v = %hhi \n",i,raw_compressed[i]);
         if(raw_compressed[i] > maximum_repeat){ // cas simple, haute repetition, ecriture simple dans result
+            //printf("large i=%ld\n",i);
             index_pt = empty_pt++; // index_pt recoit un emplace vide
             result[index_pt] = raw_compressed[i];//savegarde du compteur
             result[empty_pt++] = raw_compressed[i+1];//sauvegarde de la valeur 
         }
         else if(result[index_pt] < 0 && (result[index_pt] - raw_compressed[i] > -128)){// si compteur de redution encours
-            //printf("here \n");
-            //printf("%hhi %hhi %hhi \n",result[0], result[1] , result[2]);
-            //printf("%hhi %hhi %hhi \n",result[index_pt] , raw_compressed[i], result[index_pt] - raw_compressed[i]);
-                //printf("in if\n");
+            /*printf("in reduce case i=%ld\n",i);
+            printf("%hhi %hhi %hhi \n",result[0], result[1] , result[2]);
+            printf("%hhi %hhi %hhi \n",result[index_pt] , raw_compressed[i], result[index_pt] - raw_compressed[i]);
+            */
             result[index_pt] -= raw_compressed[i];
             for (unsigned long j = 0; j < raw_compressed[i]; j++){//ajoute le nombre de valeur necessaire
                 result[empty_pt++] = raw_compressed[i+1];
-            }
-            
+            }    
         }else{// nouvelle valeur a reduire
-            //printf("getting new\n");
+            //printf("new i=%ld \n",i);
             index_pt = empty_pt++; // index_pt recoit un emplace vide
             result[index_pt] = raw_compressed[i] * -1; //flip du compteur
             for (unsigned long j = 0; j < raw_compressed[i]; j++){//ajoute le nombre de valeur necessaire
@@ -114,14 +114,15 @@ GLbyte * reduce_raw_compressed(GLbyte* raw_compressed, unsigned long * size){
     }
     
     // affiche le contenue apres reduction
-    /*printf("After compression : empty_pt = %ld\n[", empty_pt);
+    
+    printf("After compression : empty_pt = %ld\n[", empty_pt);
     //printf("After compression : index_pt = %ld\n[ ", index_pt);
     for (unsigned long i = 0; i < empty_pt; i++)
     {
         printf("%hhi ", result[i]);
     }
-    printf(" ]\n ****************************************\n");
-    */
+    printf("]\n ****************************************\n");
+    
 
     //free(raw_compressed); // libere la memoire de la compression brute
     //reduction de l'espace memoire
@@ -551,25 +552,40 @@ int Image_load(char *filename, Image *img){
         
         img_buffer->data = (GLubyte**)malloc(3 * sizeof(GLubyte*));
         assert(img_buffer->data);
-        c = getc(fp);
         //read pixel data from file
-        for (int i = 0; i < 3; i++){
-            img_buffer->data[i]  = (GLubyte*)malloc(img_buffer->ChannelSize[i] * sizeof(GLubyte));
-            assert(img_buffer->data[i]);
-            
-            if (fread(img_buffer->data[i], (size_t) 1, (size_t) img_buffer->ChannelSize[i], fp) == 0) {
-                fprintf(stderr, "Error loading image '%s'\n", filename);
-                exit(1);
-            }
-            
-            
-            for (size_t j = 0; j < img_buffer->ChannelSize[i]; j++)
-            {
-                printf("%hhu ", img_buffer->data[i][j]);
-            }
-            printf("\n");
-            
+        img_buffer->data[RED]  = (GLubyte*)malloc(img_buffer->ChannelSize[RED] * sizeof(GLubyte));
+        img_buffer->data[GREEN]  = (GLubyte*)malloc(img_buffer->ChannelSize[GREEN] * sizeof(GLubyte));
+        img_buffer->data[BLUE]  = (GLubyte*)malloc(img_buffer->ChannelSize[RED] * sizeof(GLubyte));
+        assert(img_buffer->data[RED]);
+        assert(img_buffer->data[GREEN]);
+        assert(img_buffer->data[BLUE]);
+        
+        //c = getc(fp);//saut pour passer le "line feed"
+        if (fread(img_buffer->data[RED], (size_t) 1, (size_t) img_buffer->ChannelSize[RED], fp) == 0) {
+            fprintf(stderr, "Error loading image '%s'\n", filename);
+            exit(1);
         }
+        
+        if (fread(img_buffer->data[GREEN], (size_t) 1, (size_t) img_buffer->ChannelSize[GREEN], fp) == 0) {
+            fprintf(stderr, "Error loading image '%s'\n", filename);
+            exit(1);
+        }
+        
+        if (fread(img_buffer->data[BLUE], (size_t) 1, (size_t) img_buffer->ChannelSize[BLUE], fp) == 0) {
+            fprintf(stderr, "Error loading image '%s'\n", filename);
+            exit(1);
+        }
+        
+        
+        /*
+        for (size_t j = 0; j < img_buffer->ChannelSize[RED]; j++){printf("%hhi ", img_buffer->data[RED][j]);}
+        printf("\n");
+        for (size_t j = 0; j < img_buffer->ChannelSize[GREEN]; j++){printf("%hhi ", img_buffer->data[GREEN][j]);}
+        printf("\n");
+        for (size_t j = 0; j < img_buffer->ChannelSize[BLUE]; j++){printf("%hhi ", img_buffer->data[BLUE][j]);}
+        printf("\n");
+        */
+
         decompress_RGB(img_buffer, img);
 
         

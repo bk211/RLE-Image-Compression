@@ -152,7 +152,7 @@ void imagesave_PPM(char *filename, Image *img)
 
 int main(int argc, char const *argv[])
 {
-    
+    /*
     Image test_image = gen_test_image(6);
     imagesave_PPM("normal.ppm",&test_image);
     //print_image(test_image);
@@ -175,11 +175,27 @@ int main(int argc, char const *argv[])
         printf("%hhu ",t->data[BLUE][i]);
     }
 
-    save_compressed_RGB_image("compressed.ppm", t);
-    Image *t3 = malloc(sizeof(Image));
-    Image_load("compressed.ppm", t3);
+    */
+    //save_compressed_RGB_image("compressed.ppm", t);
 
-    //print_image(*t3);
+
+    /* 
+    Image *t4 = malloc(sizeof(Image));
+    Image_load("morty.ppm",t4);
+    Image_RGB_compressed *t5 = malloc(sizeof(Image_RGB_compressed));
+    create_compressed_image_from_RGB(t4, t5);
+    //print_image(*t4);
+    save_compressed_RGB_image("m.ppm", t5);
+    */
+
+    //printf("============================\n");
+    
+    Image *t3 = malloc(sizeof(Image));
+    Image_load("m.ppm", t3);
+    printf("start image=============\n");
+    print_image(*t3);
+    
+    //imagesave_PPM("after_getfp.ppm",t3);
 
     /*
     Image *t2 = malloc(sizeof (Image));
