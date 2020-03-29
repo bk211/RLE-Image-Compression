@@ -60,13 +60,15 @@ unsigned long compress_RGB(Image img, Image_RGB_compressed* dst, int color){
     unsigned long k = compress_GLubyte(img.data, tmp_storage, color, img.sizeX * img.sizeY, STEP_RGB);
     
     // affiche le contenue de tmp_storage //premiere compression brute
+    
     /*
     printf("\n>>>k = %ld\n[ ", k);
     for (size_t i = 0; i < k; i++){
         printf("%hhu ",tmp_storage[i]);
     }
     printf(" ]\n  ========================= \n");
-    */    
+    */
+        
 
     //reduit le resultat brute via la methode SGI
     tmp_storage = reduce_raw_compressed(tmp_storage, &k);
@@ -123,6 +125,7 @@ GLbyte * reduce_raw_compressed(GLbyte* raw_compressed, unsigned long * size){
         printf("%hhi ", result[i]);
     }
     printf("]\n ****************************************\n");
+
     */
 
     //free(raw_compressed); // libere la memoire de la compression brute
@@ -220,6 +223,10 @@ int create_compressed_image_from_RGB(Image *img, Image_RGB_compressed *result){
     result->ChannelSize[RED] = compress_RGB(*img, result, RED);
     result->ChannelSize[GREEN] = compress_RGB(*img, result, GREEN);
     result->ChannelSize[BLUE] = compress_RGB(*img, result, BLUE);
+
+    printf("end creation\n");
+    printf_compressed_img(*result);
+
     return 1;
 }
 
@@ -447,6 +454,10 @@ void save_compressed_RGB_image(char * filename, Image_RGB_compressed * img){
     printf("writed c : %ld  | size : %ld\n", c, img->ChannelSize[GREEN]);
     c = fwrite(img->data[BLUE], (size_t) 1, (size_t) img->ChannelSize[BLUE], fp);
     printf("writed c : %ld  | size : %ld\n", c, img->ChannelSize[BLUE]);
+    
+    //printf_compressed_img(*img);
+
+
     fclose(fp);
 }
 
@@ -579,7 +590,7 @@ int Image_load(char *filename, Image *img){
         }
         
         
-        /*
+        
         printf("data:\n");
         printf("RED:\n");
         for (size_t j = 0; j < img_buffer->ChannelSize[RED]; j++){printf("%hhi ", img_buffer->data[RED][j]);}
@@ -587,7 +598,7 @@ int Image_load(char *filename, Image *img){
         for (size_t j = 0; j < img_buffer->ChannelSize[GREEN]; j++){printf("%hhi ", img_buffer->data[GREEN][j]);}
         printf("\nBLUE:\n");
         for (size_t j = 0; j < img_buffer->ChannelSize[BLUE]; j++){printf("%hhi ", img_buffer->data[BLUE][j]);}
-        printf("\n");*/
+        printf("\n");
         
         decompress_RGB(img_buffer, img);
 
@@ -597,4 +608,12 @@ int Image_load(char *filename, Image *img){
     fclose(fp);
     
     return 1;
+}
+
+void printf_compressed_img(Image_RGB_compressed img){
+    for (size_t i = 0; i < 100; i++)
+    {
+        printf("%hhu ", img.data[0][i]);
+    }
+    
 }

@@ -61,4 +61,6 @@ void compress_H(Image_HSV img, Image_HSV_compressed *dst);
 void compress_SV(Image_HSV img, Image_HSV_compressed * dst, int type);
 void decompress_RGB(Image_RGB_compressed *img, Image * result);
 int Image_load(char *filename, Image *img);
+void printf_compressed_img(Image_RGB_compressed img);
+
 #endif

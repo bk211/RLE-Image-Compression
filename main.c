@@ -104,10 +104,12 @@ void menuFunc(int item) {
     printf("Compression en cours...\n");
     compressed = create_compressed_image_from_RGB(image, foo);
     printf("Fin de la compression \n");
-    
-    /*decompress_RGB(foo, decomp);
+    //printf_compressed_img(*foo);
+
+    /*
+    decompress_RGB(foo, decomp);
     print_image(*decomp);*/
-    printf("end\n");
+    //printf("end\n");
 
     break;
   case 2:
@@ -121,7 +123,7 @@ void menuFunc(int item) {
   case 4:
     if (compressed == 1)
     {
-      printf("Entrer le nom pour l'image dans cette taille\n");    
+      printf("Entrer le nom pour l'image compresse dans cette taille\n");    
       scanf("%s", &s[0]);
       save_compressed_RGB_image(s,foo);
       printf("save succes\n");
