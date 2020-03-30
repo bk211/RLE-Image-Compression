@@ -2,8 +2,6 @@
 // maximum de repetition autorise pour une reduction SGI
 const unsigned long maximum_repeat = 2;
 
-
-
 void print_image(Image img){
     for (size_t i = 0; i < img.sizeY; i++)
     {
@@ -49,9 +47,6 @@ unsigned long compress_GLubyte(GLubyte * data, GLbyte * storage, int type, unsig
 
     return k;
 }
-
-
-
 
 unsigned long compress_RGB(Image img, Image_RGB_compressed* dst, int color){
     
@@ -196,21 +191,19 @@ void conv_RGB_HSV(Image src, Image_HSV dst){
 }
 
 
-Image_HSV conv_RGB_img_to_HSV_img(Image src){
-    Image_HSV result;
-    result.sizeX = src.sizeX;
-    result.sizeY = src.sizeY;
-    result.Hdata = malloc( result.sizeX * result.sizeY * sizeof(result.Hdata));
-    assert(result.Hdata);
-    result.SVdata = malloc( 2 * sizeof(result.SVdata));    
-    assert(result.SVdata);
-    result.SVdata[S] = malloc( result.sizeX * result.sizeY * sizeof(result.SVdata[S]));
-    assert(result.SVdata[S]);
-    result.SVdata[V] = malloc( result.sizeX * result.sizeY * sizeof(result.SVdata[V]));
-    assert(result.SVdata[V]);
-    conv_RGB_HSV(src, result);
-    return result;
-}
+void conv_RGB_img_to_HSV_img(Image *src, Image_HSV *result){
+    result->sizeX = src->sizeX;
+    result->sizeY = src->sizeY;
+    result->Hdata = malloc( result->sizeX * result->sizeY * sizeof(result->Hdata));
+    assert(result->Hdata);
+    result->SVdata = malloc( 2 * sizeof(result->SVdata));    
+    assert(result->SVdata);
+    result->SVdata[S] = malloc( result->sizeX * result->sizeY * sizeof(result->SVdata[S]));
+    assert(result->SVdata[S]);
+    result->SVdata[V] = malloc( result->sizeX * result->sizeY * sizeof(result->SVdata[V]));
+    assert(result->SVdata[V]);
+    conv_RGB_HSV(*src, *result);
+ }
 
 
 int create_compressed_image_from_RGB(Image *img, Image_RGB_compressed *result){
@@ -447,11 +440,11 @@ void save_compressed_RGB_image(char * filename, Image_RGB_compressed * img){
     fprintf(fp, "%lu %lu %lu\n", img->ChannelSize[RED], img->ChannelSize[GREEN], img->ChannelSize[BLUE]);
     
     c = fwrite(img->data[RED], (size_t) 1, (size_t) img->ChannelSize[RED], fp);
-    printf("writed c : %ld  | expected : %ld\n", c, img->ChannelSize[RED]);
+    printf("wrote c : %ld  | expected : %ld\n", c, img->ChannelSize[RED]);
     c = fwrite(img->data[GREEN], (size_t) 1, (size_t) img->ChannelSize[GREEN], fp);
-    printf("writed c : %ld  | expected : %ld\n", c, img->ChannelSize[GREEN]);
+    printf("wrote c : %ld  | expected : %ld\n", c, img->ChannelSize[GREEN]);
     c = fwrite(img->data[BLUE], (size_t) 1, (size_t) img->ChannelSize[BLUE], fp);
-    printf("writed c : %ld  | expected : %ld\n", c, img->ChannelSize[BLUE]);
+    printf("wrote c : %ld  | expected : %ld\n", c, img->ChannelSize[BLUE]);
 
     //printf_compressed_img(*img);
     fclose(fp);

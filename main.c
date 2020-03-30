@@ -6,9 +6,9 @@
 #include <GL/glu.h>	
 
 Image *image;
-Image_RGB_compressed *foo;
+Image_RGB_compressed * image_RGB;
+Image_HSV_compressed * image_HSV;
 Image *decomp;
-int compressed = 0;
 
 
 #define ESCAPE 27
@@ -39,8 +39,7 @@ void Mouse(int button, int state, int x, int y) {
 int Init(char *s) {
 
   image = (Image *) malloc(sizeof(Image));
-  foo = (Image_RGB_compressed *) malloc(sizeof(Image_RGB_compressed));
-  decomp = malloc(sizeof(Image));
+  //decomp = malloc(sizeof(Image));
 
   if (image == NULL) {
     fprintf(stderr, "Out of memory\n");
@@ -97,20 +96,20 @@ void menuFunc(int item) {
   switch(item){
   case 0:
     free(image);
-    free(foo);
+    free( image_RGB);
     exit(0);
     break;
   case 1:
+    image_RGB = (Image_RGB_compressed *) malloc(sizeof(Image_RGB_compressed));
     printf("Compression en cours...\n");
-    compressed = create_compressed_image_from_RGB(image, foo);
+    create_compressed_image_from_RGB(image,  image_RGB);
     printf("Fin de la compression \n");
     printf("Entrer le nom pour l'image dans cette taille\n");    
     scanf("%s", &s[0]);
-    save_compressed_RGB_image(s,foo);
+    save_compressed_RGB_image(s, image_RGB);
     printf("save succes\n");
-    
-
     break;
+
   case 2:
     printf("Entrer le nom pour l'image dans cette taille\n");    
     scanf("%s", &s[0]);
@@ -120,6 +119,9 @@ void menuFunc(int item) {
     printf("Taille de l image : %d %d\n", (int) image->sizeX, (int) image->sizeY);
     break;
   case 4:
+    printf("Compression en cours...\n");
+    printf("Fin de la compression \n");
+    
     break;
   default:
     break;
