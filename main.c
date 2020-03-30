@@ -6,9 +6,9 @@
 #include <GL/glu.h>	
 
 Image *image;
-Image_RGB_compressed * image_RGB;
-Image_HSV_compressed * image_HSV;
-Image *decomp;
+Image_RGB_compressed * image_RGB_comp;
+Image_HSV * image_HSV;
+Image_HSV_compressed * image_HSV_comp;
 
 
 #define ESCAPE 27
@@ -96,17 +96,17 @@ void menuFunc(int item) {
   switch(item){
   case 0:
     free(image);
-    free( image_RGB);
+    free( image_RGB_comp);
     exit(0);
     break;
   case 1:
-    image_RGB = (Image_RGB_compressed *) malloc(sizeof(Image_RGB_compressed));
+    image_RGB_comp = (Image_RGB_compressed *) malloc(sizeof(Image_RGB_compressed));
     printf("Compression en cours...\n");
-    create_compressed_image_from_RGB(image,  image_RGB);
+    create_compressed_image_from_RGB(image,  image_RGB_comp);
     printf("Fin de la compression \n");
     printf("Entrer le nom pour l'image dans cette taille\n");    
     scanf("%s", &s[0]);
-    save_compressed_RGB_image(s, image_RGB);
+    save_compressed_RGB_image(s, image_RGB_comp);
     printf("save succes\n");
     break;
 
@@ -119,6 +119,9 @@ void menuFunc(int item) {
     printf("Taille de l image : %d %d\n", (int) image->sizeX, (int) image->sizeY);
     break;
   case 4:
+    image_HSV = (Image_HSV*) malloc(sizeof(Image_HSV));
+    conv_RGB_img_to_HSV_img(image, image_HSV);
+    
     printf("Compression en cours...\n");
     printf("Fin de la compression \n");
     

@@ -140,6 +140,16 @@ double min3(double x, double y, double z){
     return x < y? (x < z? x : z) : (y < z ? y : z);
 }
 
+/**
+ * @brief convertie les 3 valeurs RGB en valeurs HSV
+ * 
+ * @param r champs rouge
+ * @param g champs vert
+ * @param b champs bleu
+ * @param h champs hue
+ * @param s champs saturation
+ * @param v champs vue
+ */
 void rgb_to_hsv(GLubyte r, GLubyte g, GLubyte b, short * h, GLubyte * s, GLubyte * v){
     //printf("\nR = %hhu, G = %hhu, B = %hhu\n", r,g,b);
     double R = r / 255.0 , G = g / 255.0 , B = b / 255.0;
@@ -177,33 +187,45 @@ void rgb_to_hsv(GLubyte r, GLubyte g, GLubyte b, short * h, GLubyte * s, GLubyte
     
 }
 
-void conv_RGB_HSV(Image src, Image_HSV dst){
+/**
+ * @brief convertie une image RGB en image HSV
+ * 
+ * @param src ptr vers l'image RGB source
+ * @param dst ptr vers l'image HSV resultat
+ * @param size dimension de l'image
+ */
+void conv_RGB_HSV(Image *src, Image_HSV * dst, unsigned long size){
     short h;
     GLubyte s,v;
-    unsigned long size = src.sizeX * src.sizeY;
     for (size_t i = 0; i < size; i++){
-        rgb_to_hsv(src.data[i*3], src.data[i*3+1], src.data[i*3+2], &h, &s, &v);
-        dst.Hdata[i] = h;
-        dst.SVdata[S][i] = s;
-        dst.SVdata[V][i] = v;
+        rgb_to_hsv(src->data[i*3], src->data[i*3+1], src->data[i*3+2], &h, &s, &v);
+        dst->Hdata[i] = h;
+        dst->SVdata[S][i] = s;
+        dst->SVdata[V][i] = v;
     }
-    
 }
 
-
+/**
+ * @brief convertie une image RGB en image HSV
+ * 
+ * @param src ptr vers l'image RGB source
+ * @param dst ptr vers l'image HSV resultat
+ */
 void conv_RGB_img_to_HSV_img(Image *src, Image_HSV *result){
     result->sizeX = src->sizeX;
     result->sizeY = src->sizeY;
-    result->Hdata = malloc( result->sizeX * result->sizeY * sizeof(result->Hdata));
+    unsigned long size = result->sizeX * result->sizeY;
+    result->Hdata = malloc( size * sizeof(result->Hdata));
     assert(result->Hdata);
     result->SVdata = malloc( 2 * sizeof(result->SVdata));    
     assert(result->SVdata);
-    result->SVdata[S] = malloc( result->sizeX * result->sizeY * sizeof(result->SVdata[S]));
+    result->SVdata[S] = malloc( size * sizeof(result->SVdata[S]));
     assert(result->SVdata[S]);
-    result->SVdata[V] = malloc( result->sizeX * result->sizeY * sizeof(result->SVdata[V]));
+    result->SVdata[V] = malloc( size * sizeof(result->SVdata[V]));
     assert(result->SVdata[V]);
-    conv_RGB_HSV(*src, *result);
- }
+    conv_RGB_HSV(src, result, size);
+    
+}
 
 
 int create_compressed_image_from_RGB(Image *img, Image_RGB_compressed *result){
@@ -263,12 +285,12 @@ GLshort * reduce_raw_compressed_hue(GLshort* raw_compressed, unsigned long * siz
     // affiche le contenue apres reduction
     //printf("After compression : empty_pt = %ld\n[", empty_pt);
     //printf("After compression : index_pt = %ld\n[ ", index_pt);
-/*    for (unsigned long i = 0; i < empty_pt; i++)
+    /*    for (unsigned long i = 0; i < empty_pt; i++)
     {
         printf("%hi ", result[i]);
     }
     printf(" ]\n ****************************************\n");
-*/
+    */
     //free(raw_compressed); // libere la memoire de la compression brute
     //reduction de l'espace memoire
     //result = (GLbyte*) realloc(result, empty_pt * sizeof(GLbyte));

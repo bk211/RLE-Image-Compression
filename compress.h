@@ -55,7 +55,6 @@ unsigned long compress_GLshort(GLshort * data, GLshort * storage, unsigned long 
 void print_image(Image img);
 void rgb_to_hsv(GLubyte r, GLubyte g, GLubyte b, short * h, GLubyte * s, GLubyte * v);
 
-void conv_RGB_HSV(Image src, Image_HSV dst);
 Image_HSV_compressed create_compressed_image_from_HSV(Image_HSV img);
 void compress_H(Image_HSV img, Image_HSV_compressed *dst);
 void compress_SV(Image_HSV img, Image_HSV_compressed * dst, int type);
@@ -64,6 +63,6 @@ int Image_load(char *filename, Image *img);
 void printf_compressed_img(Image_RGB_compressed img);
 
 void conv_RGB_img_to_HSV_img(Image *src, Image_HSV *result);
-
+void conv_RGB_HSV(Image *src, Image_HSV * dst, unsigned long size);
 
 #endif

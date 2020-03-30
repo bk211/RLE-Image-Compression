@@ -28,7 +28,7 @@ LDFLAGS = -lm $(GL_LDFLAGS)
 PROGNAME = exec
 HEADERS = bmp.h compress.h
 SOURCES = main.c ppm.c compress.c
-FILE = img/requin_leopard.ppm
+FILE = img/morty.ppm
 OBJ = $(SOURCES:.c=.o)
 
 all: $(PROGNAME)
