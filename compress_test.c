@@ -130,9 +130,9 @@ Image gen_test_image(int i){
         foo.sizeX = 1;
         foo.sizeY = 1;
         foo.data = malloc( foo.sizeX* foo.sizeY * 3 *sizeof(GLubyte));
-        foo.data[0] = 100;
-        foo.data[1] = 150;
-        foo.data[2] = 255;
+        foo.data[0] = 218;
+        foo.data[1] = 187;
+        foo.data[2] = 159;
         return foo;
     }
 
@@ -175,9 +175,18 @@ int main(int argc, char const *argv[])
     GLubyte bf1, bf2, br, bg, bb;
     
     rgb_to_hsv(r1, g1, b1, &h, &bf1, &bf2);
+    printf("RGB %hhu %hhu %hhu\n", r1, g1, b1);
     printf("HSV %hi %hhu %hhu\n", h, bf1, bf2);
     hsv_to_rgb(h, bf1, bf2, &br, &bg, &bb);
     printf("RGB %hhu %hhu %hhu\n", br, bg, bb);
+    Image hh = gen_test_image(-1);
+    print_image(hh);
+    Image_HSV tt;
+    conv_RGB_img_to_HSV_img(&hh, &tt);
+    Image_HSV_compressed cc;
+    create_compressed_image_from_HSV(&tt, &cc);
+    save_compressed_HSV_image("out.ppm", &cc);
+
     /*
     FILE * fp1,* fp2;
     fp1 = fopen("raw.txt", "r");

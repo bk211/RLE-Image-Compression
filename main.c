@@ -132,6 +132,10 @@ void menuFunc(int item) {
   case 4:
     printf("Taille de l image : %d %d\n", (int) image->sizeX, (int) image->sizeY);
     break;
+  case 5:
+    print_image(*image);
+    break;
+    
   default:
     break;
   }
@@ -158,6 +162,7 @@ int main(int argc, char **argv) {
   glutAddMenuEntry("Compresser sous HSV", 2);
   glutAddMenuEntry("Sauver", 3);
   glutAddMenuEntry("Informations", 4);
+  glutAddMenuEntry("print_image", 5);
   
   glutAttachMenu(GLUT_LEFT_BUTTON);
 
