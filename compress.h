@@ -74,6 +74,6 @@ void decompress_HSV(Image_HSV_compressed *img, Image_HSV * result);
 void decompress_GLshort(GLshort * src, GLshort * dst, unsigned long size_src);
 void conv_HSV_RGB(Image_HSV *src, Image * dst, unsigned long size);
 void hsv_to_rgb(short h, GLubyte s, GLubyte v, GLubyte * r, GLubyte * g, GLubyte * b);
-
+void conv_HSV_img_to_RGB_img(Image_HSV *src, Image *result);
 
 #endif

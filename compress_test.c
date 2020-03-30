@@ -170,6 +170,10 @@ void imagesave_PPM(char *filename, Image *img)
 
 int main(int argc, char const *argv[])
 {
+    GLshort h =300;
+    GLubyte s=100,v=100, r,g,b;
+    hsv_to_rgb(h, s,v , &r, &g, &b);
+    printf("R: %hhu G: %hhu B: %hhu \n", r,g,b);
 
     //Image * f = malloc(sizeof (Image));
     //FILE *fp2, *fp3, *fp4, *fp5;

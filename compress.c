@@ -148,7 +148,7 @@ double min3(double x, double y, double z){
  * @param b blue field
  * @param h hue
  * @param s saturation
- * @param v vue
+ * @param v value
  */
 void rgb_to_hsv(GLubyte r, GLubyte g, GLubyte b, short * h, GLubyte * s, GLubyte * v){
     //printf("\nR = %hhu, G = %hhu, B = %hhu\n", r,g,b);
@@ -335,7 +335,7 @@ unsigned long compress_GLshort(GLshort * data, GLshort * storage, unsigned long 
 }
 
 /**
- * @brief compress the saturation and vue filed from source to destinamtion 
+ * @brief compress the saturation and value filed from source to destinamtion 
  * 
  * @param img source image
  * @param dst destination image
@@ -711,10 +711,9 @@ int Image_load(char *filename, Image *img){
         
         Image_HSV img_hsv;
         decompress_HSV(&img_comp, &img_hsv);
-        
+        conv_HSV_img_to_RGB_img(&img_hsv, img);
         printf("End\n");
         
-        exit(0);
     }
     
     
@@ -726,8 +725,61 @@ int Image_load(char *filename, Image *img){
 
 }
 
+/**
+ * @brief convert 3 hsv values to rgb values
+ * 
+ * @param h hue 
+ * @param s saturation
+ * @param v value
+ * @param r red
+ * @param g green
+ * @param b blue
+ */
 void hsv_to_rgb(short h, GLubyte s, GLubyte v, GLubyte * r, GLubyte * g, GLubyte * b){
+    //printf("\nh = %hi, s = %hhu, v = %hhu\n", h,s,v);
+    double _S = s / 100.0;
+    double _V = v / 100.0;
+    double C = _V * _S;
+    double M = _V - C ;
+    double X = C * (1 - abs( (h/60) % 2 -1 ));
+    //printf("X = %f\n", X);
+    //printf("S = %f  V= %f  C= %f M = %f\n",_S, _V, C, M);
 
+    //printf("R = %lf, G = %lf, B = %lf\n", R, G, B);
+    double _R, _G, _B;
+    if(h >= 0 && h < 60){
+        _R = C;
+        _G = X;
+        _B = 0;
+    }else if(h < 120){
+        _R = X;
+        _G = C;
+        _B = 0;
+    }else if(h < 180){
+        _R = 0;
+        _G = C;
+        _B = X;
+    }else if(h < 240){
+        _R = 0;
+        _G = X;
+        _B = C;
+    }else if(h < 300){
+        _R = X;
+        _G = 0;
+        _B = C;
+    }else if(h < 360){
+        _R = C;
+        _G = 0;
+        _B = X;
+    }else{
+        _R = 0;
+        _G = 0;
+        _B = 0;
+    }
+
+    *r = (_R + M) * 255 + 0.5;
+    *g = (_G + M) * 255 + 0.5;
+    *b = (_B + M) * 255 + 0.5;
 }
 
 /**
@@ -741,18 +793,11 @@ void conv_HSV_RGB(Image_HSV *src, Image * dst, unsigned long size){
     GLubyte r,g,b;
     for (size_t i = 0; i < size; i++){
         hsv_to_rgb(src->Hdata[i], src->SVdata[S][i], src->SVdata[V][i], &r, &g, &b);
+        dst->data[i*3] = r;
+        dst->data[i*3 +1] = g;
+        dst->data[i*3 +2] = b;
     }
     
-    
-    /*
-    short h;
-    GLubyte s,v;
-    for (size_t i = 0; i < size; i++){
-        rgb_to_hsv(src->data[i*3], src->data[i*3+1], src->data[i*3+2], &h, &s, &v);
-        dst->Hdata[i] = h;
-        dst->SVdata[S][i] = s;
-        dst->SVdata[V][i] = v;
-    }*/
 }
 
 
@@ -771,7 +816,7 @@ void conv_HSV_img_to_RGB_img(Image_HSV *src, Image *result){
     conv_HSV_RGB(src, result, size);
     
 }
-
+ 
 
 /**
  * @brief decompress a HSV compressed image to a HSV image
