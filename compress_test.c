@@ -107,6 +107,24 @@ Image gen_test_image(int i){
         }
 
         return foo;
+    }else if(i == 7){
+        foo.sizeX = 200;
+        foo.sizeY = 100;
+        foo.data = malloc( foo.sizeX* foo.sizeY * 3 *sizeof(GLubyte));
+        for (size_t i = 0; i < foo.sizeX * foo.sizeY ; i++){
+            if(i % foo.sizeX < 100){
+
+                foo.data[i * 3 ] = 120;
+                foo.data[i * 3 +1] = 200;
+                foo.data[i * 3 +2] = 100;
+            }else{
+                foo.data[i * 3 ] = 255;
+                foo.data[i * 3 +1] = 0;
+                foo.data[i * 3 +2] = 100;
+            }
+        }
+
+        return foo;
     }
     else{
         foo.sizeX = 1;
@@ -152,11 +170,43 @@ void imagesave_PPM(char *filename, Image *img)
 
 int main(int argc, char const *argv[])
 {
+
+    Image * f = malloc(sizeof (Image));
+    FILE *fp2, *fp3, *fp4, *fp5;
+    //open file for output
+    fp2 = fopen("red", "rb");
+    fp3 = fopen("green", "rb");
+    fp4 = fopen("blue", "rb");
+    fp5 = fopen("RGB", "rb");
     
-    Image test_image = gen_test_image(1);
+    GLubyte * reader = malloc(786228+788973+787871 * sizeof(GLubyte));
+    fread(reader, (size_t) 1 , (size_t) 786228+788973+787871, fp5);
+
+    printf("RED \n %hhi ", reader[0]);
+    for (size_t i = 1; i < 786228; i++)
+    {
+        printf("%hhu ", reader[i]);
+    }
+    
+    printf("\n GREEN \n%hhi ", reader[786228]);
+    for (size_t i = 786229; i < 786228 + 788973; i++)
+    {
+        printf("%hhu ", reader[i]);
+    }
+    
+    printf("\n BLUE \n%hhi ", reader[786228 + 788973]);
+    for (size_t i = 786228 + 788973 + 1 ; i < 786228 + 788973+787871; i++)
+    {
+        printf("%hhu ", reader[i]);
+    }
+
+    /*
+    Image test_image = gen_test_image(7);
     imagesave_PPM("normal.ppm",&test_image);
     print_image(test_image);
-    
+    */
+
+    /*
     Image_RGB_compressed *t = malloc(sizeof(Image_RGB_compressed));
     
     create_compressed_image_from_RGB(&test_image, t);
@@ -181,6 +231,7 @@ int main(int argc, char const *argv[])
     Image *t6 = malloc(sizeof(Image));
     Image_load("compressed.ppm", t6);
     print_image(*t6);
+    */
 
 
     /* 

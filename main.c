@@ -106,11 +106,11 @@ void menuFunc(int item) {
     printf("Fin de la compression \n");
     //printf_compressed_img(*foo);
 
-    /*
-    decompress_RGB(foo, decomp);
-    print_image(*decomp);*/
-    //printf("end\n");
-
+    
+    /*decompress_RGB(foo, decomp);
+    print_image(*decomp);
+    printf("end\n");
+*/
     break;
   case 2:
     printf("Entrer le nom pour l'image dans cette taille\n");    
