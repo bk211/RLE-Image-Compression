@@ -398,14 +398,14 @@ void create_compressed_image_from_HSV(Image_HSV *img , Image_HSV_compressed *res
  */
 void decompress_GLubytes(GLubyte * src, GLubyte * dst, unsigned long size_src, int pos, int coeff){
     unsigned long j = 0;
-    /*
+    
     printf("======starting\n");
-    for (size_t i = 0; i < size_src; i+=2)
+    for (size_t i = 0; i < 5; i+=2)
     {
         printf("%hhi %hhu ", src[i], src[i+1]);
     }
     printf("\n");
-    */
+    
     GLbyte iter_buffer;
     GLubyte value_buffer;
     unsigned long size_counter = 0;
@@ -543,8 +543,18 @@ void save_compressed_HSV_image(char * filename, Image_HSV_compressed * img){
     printf("wrote c : %ld  | expected : %ld\n", c, img->ChannelSize[V]);
     c = fwrite(img->Hdata, (size_t) sizeof(GLshort), (size_t) img->ChannelSize[H], fp);
     printf("wrote c : %ld  | expected : %ld\n", c, img->ChannelSize[H]);
+    printf("after writing\n");
 
-    //printf_compressed_img(*img);
+    printf("%hi %hhi %hhi\n",img->Hdata[0], img->SVdata[0][0], img->SVdata[1][0]);
+
+    for (size_t i = 1; i < 5; i++)
+    {
+      printf("%hi %hhu %hhu\n", img->Hdata[i], img->SVdata[0][i], img->SVdata[1][i]);
+    }
+
+    printf("writing done\n");
+    
+
     fclose(fp);
 }
 
@@ -709,9 +719,25 @@ int Image_load(char *filename, Image *img){
         fread(img_comp.Hdata, 1, img_comp.ChannelSize[H], fp);
         printf("reading done\n");
         
+        printf("%hi %hhi %hhi\n",img_comp.Hdata[0], img_comp.SVdata[0][0], img_comp.SVdata[1][0]);
+         for (size_t i = 1; i < 5; i++)
+        {
+        printf("%hi %hhu %hhu\n", img_comp.Hdata[i], img_comp.SVdata[0][i], img_comp.SVdata[1][i]);
+        }
+
+        printf("end img_comp \n");
+
         Image_HSV img_hsv;
         decompress_HSV(&img_comp, &img_hsv);
+        for (size_t i = 1; i < 20; i++)
+        {
+        printf("i = %ld  [%hi %hhu %hhu] |", i,img_hsv.Hdata[i], img_hsv.SVdata[0][i], img_hsv.SVdata[1][i]);
+        }
+
+        printf("\nend img hsv\n");
+
         conv_HSV_img_to_RGB_img(&img_hsv, img);
+
         printf("End\n");
         
     }
@@ -837,11 +863,18 @@ void decompress_HSV(Image_HSV_compressed *img, Image_HSV * result){
     assert(result->SVdata[V]);
     result->Hdata = malloc( size * sizeof(GLshort));
     assert(result->Hdata);
-    
+    printf("inside decompress\n");
+    printf("%hi %hhi %hhi\n",img->Hdata[0], img->SVdata[0][0], img->SVdata[1][0]);
+         for (size_t i = 1; i < 5; i++)
+    {
+        printf("%hi %hhu %hhu\n", img->Hdata[i], img->SVdata[0][i], img->SVdata[1][i]);
+    }
+
     for (size_t i = 0; i < 2; i++)
     {
-        decompress_GLubytes(img->SVdata[i], result->SVdata[i], img->ChannelSize[i], i, 2);
+        decompress_GLubytes(img->SVdata[i], result->SVdata[i], img->ChannelSize[i], 1, 1);
     }
+    decompress_GLshort(img->Hdata, result->Hdata, img->ChannelSize[H]);
 }
 
 
