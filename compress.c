@@ -224,8 +224,7 @@ int create_compressed_image_from_RGB(Image *img, Image_RGB_compressed *result){
     result->ChannelSize[GREEN] = compress_RGB(*img, result, GREEN);
     result->ChannelSize[BLUE] = compress_RGB(*img, result, BLUE);
 
-    printf("end creation\n");
-    printf_compressed_img(*result);
+    //printf_compressed_img(*result);
 
     return 1;
 }
@@ -447,11 +446,11 @@ void save_compressed_RGB_image(char * filename, Image_RGB_compressed * img){
     fprintf(fp, "%lu %lu %lu\n", img->ChannelSize[RED], img->ChannelSize[GREEN], img->ChannelSize[BLUE]);
     
     c = fwrite(img->data[RED], (size_t) 1, (size_t) img->ChannelSize[RED], fp);
-    printf("writed c : %ld  | size : %ld\n", c, img->ChannelSize[RED]);
+    printf("writed c : %ld  | expected : %ld\n", c, img->ChannelSize[RED]);
     c = fwrite(img->data[GREEN], (size_t) 1, (size_t) img->ChannelSize[GREEN], fp);
-    printf("writed c : %ld  | size : %ld\n", c, img->ChannelSize[GREEN]);
+    printf("writed c : %ld  | expected : %ld\n", c, img->ChannelSize[GREEN]);
     c = fwrite(img->data[BLUE], (size_t) 1, (size_t) img->ChannelSize[BLUE], fp);
-    printf("writed c : %ld  | size : %ld\n", c, img->ChannelSize[BLUE]);
+    printf("writed c : %ld  | expected : %ld\n", c, img->ChannelSize[BLUE]);
 
     //printf_compressed_img(*img);
     fclose(fp);
@@ -528,7 +527,7 @@ int Image_load(char *filename, Image *img){
 	    sizex = img->sizeX;
 	    sizey = img->sizeY;
 	    lastline = img->data + size - sizex * 3;
-	    for (b = 0; b < img->sizeY / 2; b++) {
+	    for (b = 0; b < sizey / 2; b++) {
 	        ptrdeb = img->data + b * sizex * 3;
 	        ptrfin = lastline - (b * sizex * 3);
 	    //	printf("%d => %ld %ld\n", b, (int) ptrdeb, (int) ptrfin);

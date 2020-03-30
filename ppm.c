@@ -73,7 +73,7 @@ int ImageLoad_PPM(char *filename, Image *img)
 	sizex = img->sizeX;
 	sizey = img->sizeY;
 	lastline = img->data + size - sizex * 3;
-	for (b = 0; b < img->sizeY / 2; b++) {
+	for (b = 0; b < sizey / 2; b++) {
 	  ptrdeb = img->data + b * sizex * 3;
 	  ptrfin = lastline - (b * sizex * 3);
 	//	printf("%d => %ld %ld\n", b, (int) ptrdeb, (int) ptrfin);
