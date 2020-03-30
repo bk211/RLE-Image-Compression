@@ -121,7 +121,9 @@ void menuFunc(int item) {
   case 4:
     image_HSV = (Image_HSV*) malloc(sizeof(Image_HSV));
     conv_RGB_img_to_HSV_img(image, image_HSV);
-    
+    image_HSV_comp = (Image_HSV_compressed*) malloc(sizeof(Image_HSV_compressed));
+    create_compressed_image_from_HSV(image_HSV, image_HSV_comp);
+  
     printf("Compression en cours...\n");
     printf("Fin de la compression \n");
     

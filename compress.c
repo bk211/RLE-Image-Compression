@@ -141,14 +141,14 @@ double min3(double x, double y, double z){
 }
 
 /**
- * @brief convertie les 3 valeurs RGB en valeurs HSV
+ * @brief convert 3 RGB values to HSV values
  * 
- * @param r champs rouge
- * @param g champs vert
- * @param b champs bleu
- * @param h champs hue
- * @param s champs saturation
- * @param v champs vue
+ * @param r red field
+ * @param g green field
+ * @param b blue field
+ * @param h hue
+ * @param s saturation
+ * @param v vue
  */
 void rgb_to_hsv(GLubyte r, GLubyte g, GLubyte b, short * h, GLubyte * s, GLubyte * v){
     //printf("\nR = %hhu, G = %hhu, B = %hhu\n", r,g,b);
@@ -188,11 +188,11 @@ void rgb_to_hsv(GLubyte r, GLubyte g, GLubyte b, short * h, GLubyte * s, GLubyte
 }
 
 /**
- * @brief convertie une image RGB en image HSV
+ * @brief convert a RGB image to HSV image
  * 
- * @param src ptr vers l'image RGB source
- * @param dst ptr vers l'image HSV resultat
- * @param size dimension de l'image
+ * @param src ptr to source RGB image
+ * @param dst ptr to destination HSV image
+ * @param size dimension of the image source
  */
 void conv_RGB_HSV(Image *src, Image_HSV * dst, unsigned long size){
     short h;
@@ -206,10 +206,10 @@ void conv_RGB_HSV(Image *src, Image_HSV * dst, unsigned long size){
 }
 
 /**
- * @brief convertie une image RGB en image HSV
+ * @brief convert a RGB image to HSV image
  * 
- * @param src ptr vers l'image RGB source
- * @param dst ptr vers l'image HSV resultat
+ * @param src ptr to source RGB image
+ * @param dst ptr to destination HSV image
  */
 void conv_RGB_img_to_HSV_img(Image *src, Image_HSV *result){
     result->sizeX = src->sizeX;
@@ -334,44 +334,57 @@ unsigned long compress_GLshort(GLshort * data, GLshort * storage, unsigned long 
     return k;
 }
 
-void compress_SV(Image_HSV img, Image_HSV_compressed *dst, int type){
-    GLbyte * tmp_storage = malloc( img.sizeX * img.sizeY * 2 * sizeof(tmp_storage)); // compression brute, la pire cas possible est un dedoublement de memoire
+/**
+ * @brief compress the saturation and vue filed from source to destinamtion 
+ * 
+ * @param img source image
+ * @param dst destination image
+ * @param type the field type (S or V)
+ */
+void compress_SV(Image_HSV *img, Image_HSV_compressed *dst, int type){
+    GLbyte * tmp_storage = malloc( img->sizeX * img->sizeY * 2 * sizeof(tmp_storage)); // compression brute, la pire cas possible est un dedoublement de memoire
     assert(tmp_storage);
-    unsigned long k = compress_GLubyte(img.SVdata[type], tmp_storage, SV, img.sizeX * img.sizeY, STEP_HSV);
+    unsigned long k = compress_GLubyte(img->SVdata[type], tmp_storage, SV, img->sizeX * img->sizeY, STEP_HSV);
 
     tmp_storage = reduce_raw_compressed(tmp_storage, &k);
     dst->SVdata[type] = (GLubyte*)tmp_storage;
     dst->ChannelSize[type] = k;
 }
 
-void compress_H(Image_HSV img, Image_HSV_compressed *dst){
-    GLshort * tmp_storage = malloc( img.sizeX * img.sizeY * 2 * sizeof(GLshort));
+/**
+ * @brief compress the hue field from source to destination
+ * 
+ * @param img source image
+ * @param dst destination image
+ */
+void compress_H(Image_HSV * img, Image_HSV_compressed *dst){
+    GLshort * tmp_storage = malloc( img->sizeX * img->sizeY * 2 * sizeof(GLshort));
     assert(tmp_storage);
-    unsigned long k = compress_GLshort(img.Hdata, tmp_storage, img.sizeX * img.sizeY);
-    for (size_t i = 0; i < k; i++)
-    {
+    unsigned long k = compress_GLshort(img->Hdata, tmp_storage, img->sizeX * img->sizeY);
+    /*for (size_t i = 0; i < k; i++){
         printf("%hi ",tmp_storage[i]);
-    }
+    }*/
     tmp_storage = reduce_raw_compressed_hue(tmp_storage,&k);
     dst->Hdata = tmp_storage;
     dst->ChannelSize[2] = k;
 }
 
-Image_HSV_compressed create_compressed_image_from_HSV(Image_HSV img){
-    Image_HSV_compressed result;
-    result.sizeX = img.sizeX;
-    result.sizeY = img.sizeY;
-    result.ChannelSize = malloc(3 * sizeof(result.ChannelSize)); // tableau de 3 size h+s+v
-    assert(result.ChannelSize);
-    result.SVdata = malloc(2 * sizeof( result.SVdata));
-    assert(result.SVdata);
-    compress_H(img, &result);
-    compress_SV(img, &result, S);
-    compress_SV(img, &result, V);
-
-
-    return result;
-
+/**
+ * @brief Create a compressed image in HSV format from HSV image
+ * 
+ * @param img 
+ * @param result 
+ */
+void create_compressed_image_from_HSV(Image_HSV *img , Image_HSV_compressed *result){
+    result->sizeX = img->sizeX;
+    result->sizeY = img->sizeY;
+    result->ChannelSize = malloc(3 * sizeof(unsigned long)); // tableau de 3 size h+s+v
+    assert(result->ChannelSize);
+    result->SVdata = malloc(2 * sizeof(GLubyte *));
+    assert(result->SVdata);
+    compress_H(img, result);
+    compress_SV(img, result, S);
+    compress_SV(img, result, V);
 }
 
 void decompress_GLubytes(GLubyte * src, GLubyte * dst, unsigned int size_src, int pos){
