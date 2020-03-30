@@ -3,9 +3,9 @@
 const unsigned long maximum_repeat = 2;
 
 void print_image(Image img){
-    for (size_t i = 0; i < img.sizeY; i++)
+    for (size_t i = 0; i < 1; i++)
     {
-        for (size_t j = 0; j < img.sizeX; j++)
+        for (size_t j = 0; j < 20; j++)
         {
             printf("[%hhu,%hhu,%hhu]",img.data[i*img.sizeY*3 + j*3],img.data[i*img.sizeY*3 + j*3+1],img.data[i*img.sizeY*3 + j *3 +2]);
         }
