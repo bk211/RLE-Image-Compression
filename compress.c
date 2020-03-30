@@ -711,6 +711,7 @@ int Image_load(char *filename, Image *img){
         
         Image_HSV img_hsv;
         decompress_HSV(&img_comp, &img_hsv);
+        
         printf("End\n");
         
         exit(0);
@@ -725,6 +726,53 @@ int Image_load(char *filename, Image *img){
 
 }
 
+void hsv_to_rgb(short h, GLubyte s, GLubyte v, GLubyte * r, GLubyte * g, GLubyte * b){
+
+}
+
+/**
+ * @brief convert a HSV image to RGB image
+ * 
+ * @param src ptr to source HSV image
+ * @param dst ptr to destination RGB image
+ * @param size dimension of the image source
+ */
+void conv_HSV_RGB(Image_HSV *src, Image * dst, unsigned long size){
+    GLubyte r,g,b;
+    for (size_t i = 0; i < size; i++){
+        hsv_to_rgb(src->Hdata[i], src->SVdata[S][i], src->SVdata[V][i], &r, &g, &b);
+    }
+    
+    
+    /*
+    short h;
+    GLubyte s,v;
+    for (size_t i = 0; i < size; i++){
+        rgb_to_hsv(src->data[i*3], src->data[i*3+1], src->data[i*3+2], &h, &s, &v);
+        dst->Hdata[i] = h;
+        dst->SVdata[S][i] = s;
+        dst->SVdata[V][i] = v;
+    }*/
+}
+
+
+/**
+ * @brief convert a HSV image to RGB image
+ * 
+ * @param src ptr to source HSV image
+ * @param dst ptr to destination RGB image
+ */
+void conv_HSV_img_to_RGB_img(Image_HSV *src, Image *result){
+    result->sizeX = src->sizeX;
+    result->sizeY = src->sizeY;
+    unsigned long size = result->sizeX * result->sizeY;
+    result->data = malloc( 3 * size * sizeof(result->data));    
+    assert(result->data);
+    conv_HSV_RGB(src, result, size);
+    
+}
+
+
 /**
  * @brief decompress a HSV compressed image to a HSV image
  * 
@@ -736,16 +784,19 @@ void decompress_HSV(Image_HSV_compressed *img, Image_HSV * result){
     result->sizeY = img->sizeY;
     unsigned long size = result->sizeX * result->sizeY;
     
-    result->SVdata = malloc( size * 3 * sizeof(GLubyte));
+    result->SVdata = malloc(2 * sizeof(GLubyte*));
     assert(result->SVdata);
-    result->Hdata = malloc( size * 3 * sizeof(GLshort));
+    result->SVdata[S] = malloc( size * sizeof(GLubyte));
+    assert(result->SVdata[S]);
+    result->SVdata[V] = malloc( size * sizeof(GLubyte));
+    assert(result->SVdata[V]);
+    result->Hdata = malloc( size * sizeof(GLshort));
     assert(result->Hdata);
     
     for (size_t i = 0; i < 2; i++)
     {
         decompress_GLubytes(img->SVdata[i], result->SVdata[i], img->ChannelSize[i], i, 2);
     }
-
 }
 
 
