@@ -110,32 +110,17 @@ void menuFunc(int item) {
     break;
   
   case 2:
-    print_image(*image);
+    //print_image(*image);
     image_HSV = (Image_HSV*) malloc(sizeof(Image_HSV));
     conv_RGB_img_to_HSV_img(image, image_HSV);
-
-    
-    for (size_t i = 1; i < 20; i++)
-    {
-      printf("i = %ld  [%hi %hhu %hhu] |", i,image_HSV->Hdata[i], image_HSV->SVdata[0][i], image_HSV->SVdata[1][i]);
-    }
-    printf("end\n");
-
     image_HSV_comp = (Image_HSV_compressed*) malloc(sizeof(Image_HSV_compressed));
     create_compressed_image_from_HSV(image_HSV, image_HSV_comp);
-
-    printf("%hi %hhi %hhi\n",image_HSV_comp->Hdata[0], image_HSV_comp->SVdata[0][0], image_HSV_comp->SVdata[1][0]);
-
-    for (size_t i = 1; i < 5; i++)
-    {
-      printf("%hi %hhu %hhu\n", image_HSV_comp->Hdata[i], image_HSV_comp->SVdata[0][i], image_HSV_comp->SVdata[1][i]);
-    }
-
-    save_compressed_HSV_image("foo.ppm", image_HSV_comp);
+    printf("Entrer le nom pour l'image dans cette taille\n");    
+    scanf("%s", &s[0]);
+    save_compressed_HSV_image(s, image_HSV_comp);
     printf("Compression en cours...\n");
     printf("Fin de la compression \n");
 
-    //*TODO free //
     
     break;
   

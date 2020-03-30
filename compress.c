@@ -3,11 +3,11 @@
 const unsigned long maximum_repeat = 2;
 
 void print_image(Image img){
-    for (size_t i = 0; i < 1; i++)
+    for (size_t i = 0; i < img.sizeY; i++)
     {
-        for (size_t j = 0; j < 20; j++)
+        for (size_t j = 0; j < img.sizeX; j++)
         {
-            printf("[%hhu,%hhu,%hhu]",img.data[i*img.sizeY*3 + j*3],img.data[i*img.sizeY*3 + j*3+1],img.data[i*img.sizeY*3 + j *3 +2]);
+            printf("%hhu %hhu %hhu\n",img.data[i*img.sizeY*3 + j*3],img.data[i*img.sizeY*3 + j*3+1],img.data[i*img.sizeY*3 + j *3 +2]);
         }
         printf("\n");
     }
@@ -399,12 +399,13 @@ void create_compressed_image_from_HSV(Image_HSV *img , Image_HSV_compressed *res
 void decompress_GLubytes(GLubyte * src, GLubyte * dst, unsigned long size_src, int pos, int coeff){
     unsigned long j = 0;
     
+    /*
     printf("======starting\n");
     for (size_t i = 0; i < 5; i+=2)
     {
         printf("%hhi %hhu ", src[i], src[i+1]);
     }
-    printf("\n");
+    printf("\n");*/
     
     GLbyte iter_buffer;
     GLubyte value_buffer;
@@ -543,16 +544,7 @@ void save_compressed_HSV_image(char * filename, Image_HSV_compressed * img){
     printf("wrote c : %ld  | expected : %ld\n", c, img->ChannelSize[V]);
     c = fwrite(img->Hdata, (size_t) sizeof(GLshort), (size_t) img->ChannelSize[H], fp);
     printf("wrote c : %ld  | expected : %ld\n", c, img->ChannelSize[H]);
-    printf("after writing\n");
 
-    printf("%hi %hhi %hhi\n",img->Hdata[0], img->SVdata[0][0], img->SVdata[1][0]);
-
-    for (size_t i = 1; i < 5; i++)
-    {
-      printf("%hi %hhu %hhu\n", img->Hdata[i], img->SVdata[0][i], img->SVdata[1][i]);
-    }
-
-    printf("writing done\n");
     
 
     fclose(fp);
@@ -661,6 +653,7 @@ int Image_load(char *filename, Image *img){
             fprintf(stderr, "Invalid image size (error loading '%s')\n", filename);
             exit(1);
         }
+        
         printf("RED size: %lu\n", img_comp.ChannelSize[RED]);
         printf("GREEN size: %lu\n", img_comp.ChannelSize[GREEN]);
         printf("BLUE size: %lu\n", img_comp.ChannelSize[BLUE]);
@@ -706,10 +699,11 @@ int Image_load(char *filename, Image *img){
             fprintf(stderr, "Invalid image size (error loading '%s')\n", filename);
             exit(1);
         }
-        printf("H size: %lu\n", img_comp.ChannelSize[H]);
+        
+        /*printf("H size: %lu\n", img_comp.ChannelSize[H]);
         printf("S size: %lu\n", img_comp.ChannelSize[S]);
         printf("V size: %lu\n", img_comp.ChannelSize[V]);
-        
+        */
         
         img_comp.SVdata[S] = malloc(img_comp.ChannelSize[S] * sizeof(GLubyte));
         img_comp.SVdata[V] = malloc(img_comp.ChannelSize[V] * sizeof(GLubyte));
@@ -717,28 +711,29 @@ int Image_load(char *filename, Image *img){
         fread(img_comp.SVdata[S], 1, img_comp.ChannelSize[S], fp);
         fread(img_comp.SVdata[V], 1, img_comp.ChannelSize[V], fp);
         fread(img_comp.Hdata, 1, img_comp.ChannelSize[H], fp);
+        /*
         printf("reading done\n");
-        
         printf("%hi %hhi %hhi\n",img_comp.Hdata[0], img_comp.SVdata[0][0], img_comp.SVdata[1][0]);
-         for (size_t i = 1; i < 5; i++)
-        {
+         for (size_t i = 1; i < 5; i++){
         printf("%hi %hhu %hhu\n", img_comp.Hdata[i], img_comp.SVdata[0][i], img_comp.SVdata[1][i]);
         }
-
         printf("end img_comp \n");
+        */
 
         Image_HSV img_hsv;
         decompress_HSV(&img_comp, &img_hsv);
-        for (size_t i = 1; i < 20; i++)
+        
+        /*for (size_t i = 1; i < 20; i++)
         {
-        printf("i = %ld  [%hi %hhu %hhu] |", i,img_hsv.Hdata[i], img_hsv.SVdata[0][i], img_hsv.SVdata[1][i]);
+        printf("i = %ld [%hi %hhu %hhu] |", i,img_hsv.Hdata[i], img_hsv.SVdata[0][i], img_hsv.SVdata[1][i]);
         }
 
         printf("\nend img hsv\n");
+        */
 
         conv_HSV_img_to_RGB_img(&img_hsv, img);
+        //print_image(*img);
 
-        printf("End\n");
         
     }
     
@@ -767,11 +762,10 @@ void hsv_to_rgb(short h, GLubyte s, GLubyte v, GLubyte * r, GLubyte * g, GLubyte
     double _V = v / 100.0;
     double C = _V * _S;
     double M = _V - C ;
-    double X = C * (1 - abs( (h/60) % 2 -1 ));
+    double X = C * (1 - fabs( fmod((h/60.0), 2) -1 ));
     //printf("X = %f\n", X);
     //printf("S = %f  V= %f  C= %f M = %f\n",_S, _V, C, M);
 
-    //printf("R = %lf, G = %lf, B = %lf\n", R, G, B);
     double _R, _G, _B;
     if(h >= 0 && h < 60){
         _R = C;
@@ -803,9 +797,11 @@ void hsv_to_rgb(short h, GLubyte s, GLubyte v, GLubyte * r, GLubyte * g, GLubyte
         _B = 0;
     }
 
+    //printf("G =%f\n", (_G+M) * 255);
     *r = (_R + M) * 255 + 0.5;
     *g = (_G + M) * 255 + 0.5;
     *b = (_B + M) * 255 + 0.5;
+    //printf("results: r= %hhu, g=%hhu, b=%hhu", *r, *g, *b);
 }
 
 /**
@@ -817,6 +813,14 @@ void hsv_to_rgb(short h, GLubyte s, GLubyte v, GLubyte * r, GLubyte * g, GLubyte
  */
 void conv_HSV_RGB(Image_HSV *src, Image * dst, unsigned long size){
     GLubyte r,g,b;
+    /*
+        printf("in conv hsv rgb\n");
+        printf("%hi %hhi %hhi\n",src->Hdata[0], src->SVdata[0][0], src->SVdata[1][0]);
+         for (size_t i = 1; i < 5; i++)
+        {
+        printf("%hi %hhu %hhu\n", src->Hdata[i], src->SVdata[0][i], src->SVdata[1][i]);
+    }*/
+
     for (size_t i = 0; i < size; i++){
         hsv_to_rgb(src->Hdata[i], src->SVdata[S][i], src->SVdata[V][i], &r, &g, &b);
         dst->data[i*3] = r;
@@ -863,16 +867,18 @@ void decompress_HSV(Image_HSV_compressed *img, Image_HSV * result){
     assert(result->SVdata[V]);
     result->Hdata = malloc( size * sizeof(GLshort));
     assert(result->Hdata);
+    
+    /*
     printf("inside decompress\n");
     printf("%hi %hhi %hhi\n",img->Hdata[0], img->SVdata[0][0], img->SVdata[1][0]);
          for (size_t i = 1; i < 5; i++)
     {
         printf("%hi %hhu %hhu\n", img->Hdata[i], img->SVdata[0][i], img->SVdata[1][i]);
-    }
+    }*/
 
     for (size_t i = 0; i < 2; i++)
     {
-        decompress_GLubytes(img->SVdata[i], result->SVdata[i], img->ChannelSize[i], 1, 1);
+        decompress_GLubytes(img->SVdata[i], result->SVdata[i], img->ChannelSize[i], 0, 1);
     }
     decompress_GLshort(img->Hdata, result->Hdata, img->ChannelSize[H]);
 }

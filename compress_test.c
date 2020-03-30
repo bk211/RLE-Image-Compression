@@ -170,11 +170,27 @@ void imagesave_PPM(char *filename, Image *img)
 
 int main(int argc, char const *argv[])
 {
-    GLshort h =300;
-    GLubyte s=100,v=100, r,g,b;
+    FILE * fp1,* fp2;
+    fp1 = fopen("raw.txt", "r");
+    fp2 = fopen("read.txt", "r");
+    GLubyte r1, r2, g1,g2, b1,b2;
+    
+    for (size_t i = 0; i < 293510; i++){
+        fscanf(fp1,"%hhu %hhu %hhu\n",&r1, &g1,&b1);
+        fscanf(fp2,"%hhu %hhu %hhu\n",&r2, &g2,&b2);
+        printf("[%hhu|%hhu] [%hhu|%hhu] [%hhu|%hhu] [%hhi %hhi %hhi][%hhi]\n",r1, r2, g1, g2, b1,b2, r2-r1, g2-g1, b2-b1, r2-r1 + g2-g1 + b2-b1);
+    }
+    
+    fclose(fp1);
+    fclose(fp2);
+    
+    /*
+    GLshort h =199;
+    GLubyte s=25,v=29, r,g,b;
     hsv_to_rgb(h, s,v , &r, &g, &b);
-    printf("R: %hhu G: %hhu B: %hhu \n", r,g,b);
+    printf("\nR: %hhu G: %hhu B: %hhu \n", r,g,b);*/
 
+    //56,69,75
     //Image * f = malloc(sizeof (Image));
     //FILE *fp2, *fp3, *fp4, *fp5;
     //open file for output
