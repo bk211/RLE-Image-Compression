@@ -62,7 +62,7 @@ void printf_compressed_img(Image_RGB_compressed img);
 
 void decompress_RGB(Image_RGB_compressed *img, Image * result);
 
-void decompress_GLubytes(GLubyte * src, GLubyte * dst, unsigned int size_src, int pos, int coeff);
+void decompress_GLubytes(GLubyte * src, GLubyte * dst, unsigned long size_src, int pos, int coeff);
 
 void conv_RGB_img_to_HSV_img(Image *src, Image_HSV *result);
 void conv_RGB_HSV(Image *src, Image_HSV * dst, unsigned long size);
@@ -71,5 +71,5 @@ void compress_H(Image_HSV * img, Image_HSV_compressed *dst);
 void compress_SV(Image_HSV * img, Image_HSV_compressed * dst, int type);
 void save_compressed_HSV_image(char * filename, Image_HSV_compressed * img);
 void decompress_HSV(Image_HSV_compressed *img, Image_HSV * result);
-
+void decompress_GLshort(GLshort * src, GLshort * dst, unsigned long size_src);
 #endif

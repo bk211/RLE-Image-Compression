@@ -39,8 +39,7 @@ void Mouse(int button, int state, int x, int y) {
 int Init(char *s) {
 
   image = (Image *) malloc(sizeof(Image));
-  //decomp = malloc(sizeof(Image));
-
+  
   if (image == NULL) {
     fprintf(stderr, "Out of memory\n");
     return(-1);
@@ -109,24 +108,27 @@ void menuFunc(int item) {
     save_compressed_RGB_image(s, image_RGB_comp);
     printf("save succes\n");
     break;
-
+  
   case 2:
-    printf("Entrer le nom pour l'image dans cette taille\n");    
-    scanf("%s", &s[0]);
-    imagesave_PPM(s, image);
-    break;
-  case 3:
-    printf("Taille de l image : %d %d\n", (int) image->sizeX, (int) image->sizeY);
-    break;
-  case 4:
     image_HSV = (Image_HSV*) malloc(sizeof(Image_HSV));
     conv_RGB_img_to_HSV_img(image, image_HSV);
     image_HSV_comp = (Image_HSV_compressed*) malloc(sizeof(Image_HSV_compressed));
     create_compressed_image_from_HSV(image_HSV, image_HSV_comp);
-  
+    save_compressed_HSV_image("foo.ppm", image_HSV_comp);
     printf("Compression en cours...\n");
     printf("Fin de la compression \n");
+
+    //*TODO free //
     
+    break;
+  
+  case 3:
+    printf("Entrer le nom pour l'image dans cette taille\n");    
+    scanf("%s", &s[0]);
+    imagesave_PPM(s, image);
+    break;
+  case 4:
+    printf("Taille de l image : %d %d\n", (int) image->sizeX, (int) image->sizeY);
     break;
   default:
     break;
@@ -151,9 +153,9 @@ int main(int argc, char **argv) {
   glutCreateMenu(menuFunc);
   glutAddMenuEntry("Quit", 0);
   glutAddMenuEntry("Compresser sous RGB", 1);
-  glutAddMenuEntry("Sauver", 2);
-  glutAddMenuEntry("Informations", 3);
-  glutAddMenuEntry("Compresser sous HSV", 4);
+  glutAddMenuEntry("Compresser sous HSV", 2);
+  glutAddMenuEntry("Sauver", 3);
+  glutAddMenuEntry("Informations", 4);
   
   glutAttachMenu(GLUT_LEFT_BUTTON);
 

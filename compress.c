@@ -396,8 +396,8 @@ void create_compressed_image_from_HSV(Image_HSV *img , Image_HSV_compressed *res
  * @param pos sub-position in the pixel
  * @param coeff coefficient to apply to get the real position of the pixel
  */
-void decompress_GLubytes(GLubyte * src, GLubyte * dst, unsigned int size_src, int pos, int coeff){
-    unsigned int j = 0;
+void decompress_GLubytes(GLubyte * src, GLubyte * dst, unsigned long size_src, int pos, int coeff){
+    unsigned long j = 0;
     /*
     printf("======starting\n");
     for (size_t i = 0; i < size_src; i+=2)
@@ -415,7 +415,7 @@ void decompress_GLubytes(GLubyte * src, GLubyte * dst, unsigned int size_src, in
         if(iter_buffer > 0){//cas repetition simple
             //printf("positive case\n");
             value_buffer = src[j+1];
-            for (GLbyte k = 0; k < iter_buffer; k++){
+            for (size_t k = 0; k < iter_buffer; k++){
                 //printf("value_buffer = %hhu ,pos = %ld\n",value_buffer,size_counter * coeff + pos );
                 dst[size_counter++ * coeff + pos] = value_buffer;
             }
@@ -425,7 +425,7 @@ void decompress_GLubytes(GLubyte * src, GLubyte * dst, unsigned int size_src, in
             //printf("negative case\n");
             iter_buffer = iter_buffer * -1;
 
-            for (GLbyte k = 0; k < iter_buffer; k++){
+            for (size_t k = 0; k < iter_buffer; k++){
                 value_buffer = src[++j];
                 //printf("value_buffer = %hhu ,pos = %ld\n",value_buffer,size_counter * coeff + pos );
                 dst[size_counter++ * coeff + pos] = value_buffer;
@@ -747,6 +747,51 @@ void decompress_HSV(Image_HSV_compressed *img, Image_HSV * result){
     }
 
 }
+
+
+/**
+ * @brief decompress the compressed GLubyte array to destination array
+ * 
+ * @param src source compressed array
+ * @param dst destination array
+ * @param size_src size of the source array
+ * @param pos sub-position in the pixel
+ * @param coeff coefficient to apply to get the real position of the pixel
+ */
+void decompress_GLshort(GLshort * src, GLshort * dst, unsigned long size_src){
+    unsigned long j = 0;
+    GLshort iter_buffer;
+    GLshort value_buffer;
+    unsigned long ptr_empty = 0;
+    while (j < size_src){
+        iter_buffer = src[j];
+        //printf("iter_buffer = %hi\n", iter_buffer);
+        if(iter_buffer > 0){//cas repetition simple
+            //printf("positive case\n");
+            value_buffer = src[j+1];
+            for (size_t k = 0; k < iter_buffer; k++){
+                //printf("value_buffer = %hhu ,pos = %ld\n",value_buffer,ptr_empty);
+                dst[ptr_empty++ ] = value_buffer;
+            }
+            j+=2;
+
+        }else{ //cas repetition negative
+            //printf("negative case\n");
+            iter_buffer = iter_buffer * -1;
+
+            for (size_t k = 0; k < iter_buffer; k++){
+                value_buffer = src[++j];
+                //printf("value_buffer = %hhu ,pos = %ld\n",value_buffer,ptr_empty  );
+                dst[ptr_empty++ ] = value_buffer;
+            }
+            j++;
+                        
+        }
+
+    }
+    
+}
+
 
 
 void printf_compressed_img(Image_RGB_compressed img){
