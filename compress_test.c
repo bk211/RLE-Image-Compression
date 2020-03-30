@@ -170,10 +170,18 @@ void imagesave_PPM(char *filename, Image *img)
 
 int main(int argc, char const *argv[])
 {
+    GLubyte r1 = 218, r2 = 127, g1= 187,g2= 158, b1 =159 ,b2 =158;
+    GLshort h;
+    GLubyte bf1, bf2, br, bg, bb;
+    
+    rgb_to_hsv(r1, g1, b1, &h, &bf1, &bf2);
+    printf("HSV %hi %hhu %hhu\n", h, bf1, bf2);
+    hsv_to_rgb(h, bf1, bf2, &br, &bg, &bb);
+    printf("RGB %hhu %hhu %hhu\n", br, bg, bb);
+    /*
     FILE * fp1,* fp2;
     fp1 = fopen("raw.txt", "r");
     fp2 = fopen("read.txt", "r");
-    GLubyte r1, r2, g1,g2, b1,b2;
     
     for (size_t i = 0; i < 293510; i++){
         fscanf(fp1,"%hhu %hhu %hhu\n",&r1, &g1,&b1);
@@ -182,7 +190,7 @@ int main(int argc, char const *argv[])
     }
     
     fclose(fp1);
-    fclose(fp2);
+    fclose(fp2);*/
     
     /*
     GLshort h =199;
