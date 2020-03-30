@@ -8,6 +8,7 @@
 #define BLUE 2
 #define S 0
 #define V 1
+#define H 2
 #define SV 0
 
 #define STEP_RGB 3
@@ -56,14 +57,19 @@ void print_image(Image img);
 void rgb_to_hsv(GLubyte r, GLubyte g, GLubyte b, short * h, GLubyte * s, GLubyte * v);
 
 
-void decompress_RGB(Image_RGB_compressed *img, Image * result);
 int Image_load(char *filename, Image *img);
 void printf_compressed_img(Image_RGB_compressed img);
+
+void decompress_RGB(Image_RGB_compressed *img, Image * result);
+
+void decompress_GLubytes(GLubyte * src, GLubyte * dst, unsigned int size_src, int pos, int coeff);
 
 void conv_RGB_img_to_HSV_img(Image *src, Image_HSV *result);
 void conv_RGB_HSV(Image *src, Image_HSV * dst, unsigned long size);
 void create_compressed_image_from_HSV(Image_HSV *img , Image_HSV_compressed *result);
 void compress_H(Image_HSV * img, Image_HSV_compressed *dst);
 void compress_SV(Image_HSV * img, Image_HSV_compressed * dst, int type);
+void save_compressed_HSV_image(char * filename, Image_HSV_compressed * img);
+void decompress_HSV(Image_HSV_compressed *img, Image_HSV * result);
 
 #endif
