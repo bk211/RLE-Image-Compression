@@ -444,45 +444,40 @@ void save_compressed_RGB_image(char * filename, Image_RGB_compressed * img){
 
     unsigned long c;
     // channelSize // pixel data
-    fprintf(fp, "%lu\n", img->ChannelSize[RED]);
+    fprintf(fp, "%lu %lu %lu\n", img->ChannelSize[RED], img->ChannelSize[GREEN], img->ChannelSize[BLUE]);
+    
     c = fwrite(img->data[RED], (size_t) 1, (size_t) img->ChannelSize[RED], fp);
     printf("writed c : %ld  | size : %ld\n", c, img->ChannelSize[RED]);
-
-    fprintf(fp, "%lu\n", img->ChannelSize[GREEN]);
     c = fwrite(img->data[GREEN], (size_t) 1, (size_t) img->ChannelSize[GREEN], fp);
     printf("writed c : %ld  | size : %ld\n", c, img->ChannelSize[GREEN]);
-    
-    fprintf(fp, "%lu\n", img->ChannelSize[BLUE]);
     c = fwrite(img->data[BLUE], (size_t) 1, (size_t) img->ChannelSize[BLUE], fp);
     printf("writed c : %ld  | size : %ld\n", c, img->ChannelSize[BLUE]);
-    
-    printf_compressed_img(*img);
 
-
+    //printf_compressed_img(*img);
     fclose(fp);
 }
 
 int Image_load(char *filename, Image *img){
-  char d, buff[16];
-         FILE *fp;
-         int b, c, rgb_comp_color, size, sizex, sizey;
-		 GLubyte tmp, * ptrdeb, *ptrfin, *lastline;
-         //open PPM file for reading
-         fp = fopen(filename, "rb");
-         if (!fp) {
-              fprintf(stderr, "Unable to open file '%s'\n", filename);
-              exit(1);
-         }
+    char d, buff[16];
+    FILE *fp;
+    int b, c, rgb_comp_color, size, sizex, sizey;
+	GLubyte tmp, * ptrdeb, *ptrfin, *lastline;
+    //open PPM file for reading
+    fp = fopen(filename, "rb");
+    if (!fp) {
+        fprintf(stderr, "Unable to open file '%s'\n", filename);
+        exit(1);
+    }
 
-         //read image format
-         if (!fgets(buff, sizeof(buff), fp)) {
-              perror(filename);
-              exit(1);
-         }
+    //read image format
+    if (!fgets(buff, sizeof(buff), fp)) {
+        perror(filename);
+        exit(1);
+    }
 
     //check the image format
-    if (buff[0] != 'P' || buff[1] != '6') {
-         fprintf(stderr, "Invalid image format (must be 'P6')\n");
+    if (buff[0] != 'P' || ( buff[1] != '6' && buff[1] != '7' )) {
+         fprintf(stderr, "Invalid image format (must be 'P6' or 'P7')\n");
          exit(1);
     }
 
@@ -494,6 +489,7 @@ int Image_load(char *filename, Image *img){
 	  c = getc(fp);
     }
     ungetc(c, fp);
+    
     //read image size information
     if (fscanf(fp, "%lu %lu", &img->sizeX, &img->sizeY) != 2) {
          fprintf(stderr, "Invalid image size (error loading '%s')\n", filename);
@@ -505,51 +501,120 @@ int Image_load(char *filename, Image *img){
          fprintf(stderr, "Invalid rgb component (error loading '%s')\n", filename);
          exit(1);
     }
+
     fscanf(fp, "%c ", &d);
     //check rgb component depth
     if (rgb_comp_color!= 255) {
          fprintf(stderr, "'%s' does not have 8-bits components\n", filename);
          exit(1);
     }
+
 	/* allocation memoire */
 	size = img->sizeX * img->sizeY * 3;
 	printf("Size image %lu %lu => %d\n", img->sizeX, img->sizeY, size);
 	img->data = (GLubyte *) malloc ((size_t) size * sizeof (GLubyte));
 	assert(img->data);
-									
 
-    //read pixel data from file
-    if (fread(img->data, (size_t) 1, (size_t) size, fp) == 0) {
-         fprintf(stderr, "Error loading image '%s'\n", filename);
-		 /*
-         exit(1);
-		 */
+    if(buff[1] == '6'){
+        //read pixel data from file
+        if (fread(img->data, (size_t) 1, (size_t) size, fp) == 0) {
+             fprintf(stderr, "Error loading image '%s'\n", filename);
+	    	 /*
+             exit(1);
+	    	 */
+        }
+        /* remettre l image dans le bon sens */
+	    //	printf("debut %ld fin %ld\n", (int) img->data, (int) img->data + size);
+	    sizex = img->sizeX;
+	    sizey = img->sizeY;
+	    lastline = img->data + size - sizex * 3;
+	    for (b = 0; b < img->sizeY / 2; b++) {
+	        ptrdeb = img->data + b * sizex * 3;
+	        ptrfin = lastline - (b * sizex * 3);
+	    //	printf("%d => %ld %ld\n", b, (int) ptrdeb, (int) ptrfin);
+	      for (c = 0; c < 3 * sizex; c++) {
+	    	tmp = *ptrdeb;
+	    	*ptrdeb = *ptrfin;
+	    	*ptrfin = tmp;
+	    	ptrfin++;
+	    	ptrdeb++;
+	        }		
+	    }
+
+    }else if(buff[1] == '7'){
+        Image_RGB_compressed img_comp;
+        img_comp.sizeX = img->sizeX;
+        img_comp.sizeY = img->sizeY;
+        img_comp.ChannelSize = malloc(3 * sizeof(unsigned long));
+        img_comp.data = malloc(3 * sizeof(GLubyte*));
+
+        //printf("size: %lu %lu\n", img_comp.sizeX, img_comp.sizeY);
+        if (fscanf(fp, "%lu %lu %lu\n", &img_comp.ChannelSize[RED], &img_comp.ChannelSize[GREEN], &img_comp.ChannelSize[BLUE]) != 3){
+            fprintf(stderr, "Invalid image size (error loading '%s')\n", filename);
+            exit(1);
+        }
+        printf("RED size: %lu\n", img_comp.ChannelSize[RED]);
+        printf("GREEN size: %lu\n", img_comp.ChannelSize[GREEN]);
+        printf("BLUE size: %lu\n", img_comp.ChannelSize[BLUE]);
+        
+        
+        img_comp.data[RED] = malloc(img_comp.ChannelSize[RED] * sizeof(GLubyte));
+        img_comp.data[GREEN] = malloc(img_comp.ChannelSize[GREEN] * sizeof(GLubyte));
+        img_comp.data[BLUE] = malloc(img_comp.ChannelSize[BLUE] * sizeof(GLubyte));
+        fread(img_comp.data[RED], 1, img_comp.ChannelSize[RED], fp);
+        fread(img_comp.data[GREEN], 1, img_comp.ChannelSize[GREEN], fp);
+        fread(img_comp.data[BLUE], 1, img_comp.ChannelSize[BLUE], fp);
+        
+
+        /*
+        printf(">%hhi ",img_comp.data[RED][0] );
+        for (size_t i = 1; i < 100; i++)
+        {
+            printf("%hhu ",img_comp.data[RED][i] );
+        }
+        printf("\n>%hhi ",img_comp.data[GREEN][0] );
+        for (size_t i = 1; i < 100; i++)
+        {
+            printf("%hhu ",img_comp.data[GREEN][i] );
+        }
+        printf("\n>%hhi ",img_comp.data[BLUE][0] );
+        for (size_t i = 1; i < 100; i++)
+        {
+            printf("%hhu ",img_comp.data[BLUE][i] );
+        }
+        */
+
+        decompress_RGB(&img_comp, img);
+
+        printf("End\n");
     }
-	/* remettre l image dans le bon sens */
-	//	printf("debut %ld fin %ld\n", (int) img->data, (int) img->data + size);
-	sizex = img->sizeX;
-	sizey = img->sizeY;
-	lastline = img->data + size - sizex * 3;
-	for (b = 0; b < img->sizeY / 2; b++) {
-	  ptrdeb = img->data + b * sizex * 3;
-	  ptrfin = lastline - (b * sizex * 3);
-	//	printf("%d => %ld %ld\n", b, (int) ptrdeb, (int) ptrfin);
-	  for (c = 0; c < 3 * sizex; c++) {
-		  tmp = *ptrdeb;
-		  *ptrdeb = *ptrfin;
-		  *ptrfin = tmp;
-		  ptrfin++;
-		  ptrdeb++;
-	  }		
-	}
+    
+	
+
     fclose(fp);
     return 1;
+   
+
 }
 
 void printf_compressed_img(Image_RGB_compressed img){
-    for (size_t i = 0; i < 100; i++)
+    
+    printf("%hhi ", img.data[0][0]);
+    for (size_t i = 1; i < 100; i++)
     {
         printf("%hhu ", img.data[0][i]);
+    }
+
+    printf("\n%hhi ", img.data[1][0]);
+    for (size_t i = 1; i < 100; i++)
+    {
+        printf("%hhu ", img.data[1][i]);
+    }
+
+    printf("\n%hhi ", img.data[2][0]);
+    for (size_t i = 1; i < 100; i++)
+    {
+        printf("%hhu ", img.data[2][i]);
     }
     
 }
