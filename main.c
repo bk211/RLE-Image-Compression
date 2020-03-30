@@ -104,13 +104,12 @@ void menuFunc(int item) {
     printf("Compression en cours...\n");
     compressed = create_compressed_image_from_RGB(image, foo);
     printf("Fin de la compression \n");
-    //printf_compressed_img(*foo);
-
+    printf("Entrer le nom pour l'image dans cette taille\n");    
+    scanf("%s", &s[0]);
+    save_compressed_RGB_image(s,foo);
+    printf("save succes\n");
     
-    /*decompress_RGB(foo, decomp);
-    print_image(*decomp);
-    printf("end\n");
-*/
+
     break;
   case 2:
     printf("Entrer le nom pour l'image dans cette taille\n");    
@@ -121,16 +120,6 @@ void menuFunc(int item) {
     printf("Taille de l image : %d %d\n", (int) image->sizeX, (int) image->sizeY);
     break;
   case 4:
-    if (compressed == 1)
-    {
-      printf("Entrer le nom pour l'image compresse dans cette taille\n");    
-      scanf("%s", &s[0]);
-      save_compressed_RGB_image(s,foo);
-      printf("save succes\n");
-    }else{
-      printf("Compressed image not found plz compress first\n");
-    }
-    
     break;
   default:
     break;
@@ -154,10 +143,10 @@ int main(int argc, char **argv) {
 
   glutCreateMenu(menuFunc);
   glutAddMenuEntry("Quit", 0);
-  glutAddMenuEntry("compress", 1);
+  glutAddMenuEntry("Compresser sous RGB", 1);
   glutAddMenuEntry("Sauver", 2);
   glutAddMenuEntry("Informations", 3);
-  glutAddMenuEntry("Sauver la compression", 4);
+  glutAddMenuEntry("Compresser sous HSV", 4);
   
   glutAttachMenu(GLUT_LEFT_BUTTON);
 

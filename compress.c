@@ -234,6 +234,7 @@ GLshort * reduce_raw_compressed_hue(GLshort* raw_compressed, unsigned long * siz
     
     GLshort * result = malloc( *size * sizeof(GLshort));
     assert(result);
+    result[0] = 0;
 
     unsigned long empty_pt = 0, index_pt = 0;
     //printf("start compressing\n");
@@ -245,7 +246,7 @@ GLshort * reduce_raw_compressed_hue(GLshort* raw_compressed, unsigned long * siz
             result[index_pt] = raw_compressed[i];//savegarde du compteur
             result[empty_pt++] = raw_compressed[i+1];//sauvegarde de la valeur 
         }
-        else if(result[index_pt] < 0 && (result[index_pt] - raw_compressed[i] > -128)){// si compteur de redution encours
+        else if(result[index_pt] < 0 && (result[index_pt] - raw_compressed[i] > -32767)){// si compteur de redution encours
             //printf("here \n");
             //printf("%hi %hi %hi \n",result[0], result[1] , result[2]);
             //printf("%hi %hi %hi \n",result[index_pt] , raw_compressed[i], result[index_pt] - raw_compressed[i]);
@@ -285,14 +286,14 @@ GLshort * reduce_raw_compressed_hue(GLshort* raw_compressed, unsigned long * siz
 } 
 
 unsigned long compress_GLshort(GLshort * data, GLshort * storage, unsigned long size){
-    unsigned long k = 0;
-    GLushort buffer = data[0];
     GLshort counter =0;
+    GLushort buffer = data[0];
+    unsigned long k = 0;
     for (unsigned long i = 0; i < size; i++)
         {
             //printf("%hhu, ", data[i]);
             if(buffer == data[i]){//si suite de valeur identique
-                if(counter < 32767){
+                if(counter < 32766){
                     counter++;
                 }else{
                     //printf("<limit counter, push up new> ");

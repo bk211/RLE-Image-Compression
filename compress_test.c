@@ -171,35 +171,10 @@ void imagesave_PPM(char *filename, Image *img)
 int main(int argc, char const *argv[])
 {
 
-    Image * f = malloc(sizeof (Image));
-    FILE *fp2, *fp3, *fp4, *fp5;
+    //Image * f = malloc(sizeof (Image));
+    //FILE *fp2, *fp3, *fp4, *fp5;
     //open file for output
-    fp2 = fopen("red", "rb");
-    fp3 = fopen("green", "rb");
-    fp4 = fopen("blue", "rb");
-    fp5 = fopen("RGB", "rb");
     
-    GLubyte * reader = malloc(786228+788973+787871 * sizeof(GLubyte));
-    fread(reader, (size_t) 1 , (size_t) 786228+788973+787871, fp5);
-
-    printf("RED \n %hhi ", reader[0]);
-    for (size_t i = 1; i < 786228; i++)
-    {
-        printf("%hhu ", reader[i]);
-    }
-    
-    printf("\n GREEN \n%hhi ", reader[786228]);
-    for (size_t i = 786229; i < 786228 + 788973; i++)
-    {
-        printf("%hhu ", reader[i]);
-    }
-    
-    printf("\n BLUE \n%hhi ", reader[786228 + 788973]);
-    for (size_t i = 786228 + 788973 + 1 ; i < 786228 + 788973+787871; i++)
-    {
-        printf("%hhu ", reader[i]);
-    }
-
     /*
     Image test_image = gen_test_image(7);
     imagesave_PPM("normal.ppm",&test_image);
