@@ -99,6 +99,7 @@ void menuFunc(int item) {
     exit(0);
     break;
   case 1:
+    free_images(NULL, image_RGB_comp, NULL, NULL);
     image_RGB_comp = (Image_RGB_compressed *) malloc(sizeof(Image_RGB_compressed));
     printf("Compression en cours...\n");
     create_compressed_image_from_RGB(image,  image_RGB_comp);
@@ -109,11 +110,11 @@ void menuFunc(int item) {
     save_compressed_RGB_image(s, image_RGB_comp);
     printf("save succes\n");
     
-    free_images(NULL, image_RGB_comp, NULL, NULL);
 
     break;
   
   case 2:
+    free_images(NULL, NULL, image_HSV, image_HSV_comp);
     printf("Compression en cours...\n");
     image_HSV = (Image_HSV*) malloc(sizeof(Image_HSV));
     conv_RGB_img_to_HSV_img(image, image_HSV);
@@ -125,7 +126,6 @@ void menuFunc(int item) {
     scanf("%s", &s[0]);
     save_compressed_HSV_image(s, image_HSV_comp);
     printf("save succes\n");
-    free_images(NULL, NULL, image_HSV, image_HSV_comp);
 
     break;
   
