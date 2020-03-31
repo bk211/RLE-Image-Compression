@@ -94,8 +94,8 @@ void menuFunc(int item) {
 
   switch(item){
   case 0:
-    free(image);
-    free( image_RGB_comp);
+    free_images(image, image_RGB_comp, image_HSV, image_HSV_comp);
+    printf("All memory free\nGoodbye\n");
     exit(0);
     break;
   case 1:
@@ -103,25 +103,30 @@ void menuFunc(int item) {
     printf("Compression en cours...\n");
     create_compressed_image_from_RGB(image,  image_RGB_comp);
     printf("Fin de la compression \n");
+    
     printf("Entrer le nom pour l'image dans cette taille\n");    
     scanf("%s", &s[0]);
     save_compressed_RGB_image(s, image_RGB_comp);
     printf("save succes\n");
+    
+    free_images(NULL, image_RGB_comp, NULL, NULL);
+
     break;
   
   case 2:
-    //print_image(*image);
+    printf("Compression en cours...\n");
     image_HSV = (Image_HSV*) malloc(sizeof(Image_HSV));
     conv_RGB_img_to_HSV_img(image, image_HSV);
     image_HSV_comp = (Image_HSV_compressed*) malloc(sizeof(Image_HSV_compressed));
     create_compressed_image_from_HSV(image_HSV, image_HSV_comp);
+    printf("Fin de la compression \n");
+    
     printf("Entrer le nom pour l'image dans cette taille\n");    
     scanf("%s", &s[0]);
     save_compressed_HSV_image(s, image_HSV_comp);
-    printf("Compression en cours...\n");
-    printf("Fin de la compression \n");
+    printf("save succes\n");
+    free_images(NULL, NULL, image_HSV, image_HSV_comp);
 
-    
     break;
   
   case 3:
@@ -133,7 +138,7 @@ void menuFunc(int item) {
     printf("Taille de l image : %d %d\n", (int) image->sizeX, (int) image->sizeY);
     break;
   case 5:
-    print_image(*image);
+    printf("You have clicked this button\n");
     break;
     
   default:
@@ -162,7 +167,7 @@ int main(int argc, char **argv) {
   glutAddMenuEntry("Compresser sous HSV", 2);
   glutAddMenuEntry("Sauver", 3);
   glutAddMenuEntry("Informations", 4);
-  glutAddMenuEntry("print_image", 5);
+  glutAddMenuEntry("click me", 5);
   
   glutAttachMenu(GLUT_LEFT_BUTTON);
 

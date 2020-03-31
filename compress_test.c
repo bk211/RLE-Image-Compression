@@ -180,6 +180,7 @@ void imagesave_PPM(char *filename, Image *img)
 
 int main(int argc, char const *argv[])
 {
+    /*
     GLubyte r1 = 218, r2 = 127, g1= 187,g2= 158, b1 =159 ,b2 =158;
     GLshort h;
     GLubyte bf1, bf2, br, bg, bb;
@@ -202,11 +203,41 @@ int main(int argc, char const *argv[])
     Image_HSV_compressed cc;
     create_compressed_image_from_HSV(&tt, &cc);
     save_compressed_HSV_image("out.ppm", &cc);
+    */
+
     Image ff;
-    Image_load("out.ppm", &ff);
+    Image_load("img/hibou.ppm", &ff);
     //printf("printing image:\n");
     //print_image(ff);
+    //printf("printing image:\n");
+    //print_image(hh);
+    Image_HSV tt;
+    conv_RGB_img_to_HSV_img(&ff, &tt);
+
+    /*
+    printf("printing hsv:\n");    
     
+    printf("%hi %hhi %hhi \n", tt.Hdata[0], tt.SVdata[S][0], tt.SVdata[V][0]);
+    for (size_t i = 1; i < 20; i++)
+    {
+        printf("%hu %hhu %hhu \n", tt.Hdata[i], tt.SVdata[S][i], tt.SVdata[V][i]);
+    }
+    */
+
+    Image_HSV_compressed cc;
+    create_compressed_image_from_HSV(&tt, &cc);
+    /*printf("printing comp hsv:\n");    
+    
+    printf("%hi %hhi %hhi \n", cc.Hdata[0], cc.SVdata[S][0], cc.SVdata[V][0]);
+    for (size_t i = 1; i < 20; i++)
+    {
+        printf("%hi %hhu %hhu \n", cc.Hdata[i], cc.SVdata[S][i], cc.SVdata[V][i]);
+    }*/
+
+    save_compressed_HSV_image("out.ppm", &cc);
+    Image zz;
+    Image_load("out.ppm", &zz);
+
     /*
     FILE * fp1,* fp2;
     fp1 = fopen("raw.txt", "r");

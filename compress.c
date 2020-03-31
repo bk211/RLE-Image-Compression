@@ -283,9 +283,9 @@ GLshort * reduce_raw_compressed_hue(GLshort* raw_compressed, unsigned long * siz
     }
     
     // affiche le contenue apres reduction
-    //printf("After compression : empty_pt = %ld\n[", empty_pt);
-    //printf("After compression : index_pt = %ld\n[ ", index_pt);
-    /*    for (unsigned long i = 0; i < empty_pt; i++)
+    /*printf("After compression : empty_pt = %ld\n[", empty_pt);
+    printf("After compression : index_pt = %ld\n[ ", index_pt);
+        for (unsigned long i = 0; i < 20; i++)
     {
         printf("%hi ", result[i]);
     }
@@ -361,9 +361,11 @@ void compress_H(Image_HSV * img, Image_HSV_compressed *dst){
     GLshort * tmp_storage = malloc( img->sizeX * img->sizeY * 2 * sizeof(GLshort));
     assert(tmp_storage);
     unsigned long k = compress_GLshort(img->Hdata, tmp_storage, img->sizeX * img->sizeY);
-    /*for (size_t i = 0; i < k; i++){
+    /*printf("in compressH\n");
+    for (size_t i = 0; i < 10; i++){
         printf("%hi ",tmp_storage[i]);
-    }*/
+    }
+    */
     tmp_storage = reduce_raw_compressed_hue(tmp_storage,&k);
     dst->Hdata = tmp_storage;
     dst->ChannelSize[H] = k;
@@ -378,6 +380,14 @@ void compress_H(Image_HSV * img, Image_HSV_compressed *dst){
 void create_compressed_image_from_HSV(Image_HSV *img , Image_HSV_compressed *result){
     result->sizeX = img->sizeX;
     result->sizeY = img->sizeY;
+    /*
+    printf("printing hsv:\n");    
+    printf("%hi %hhi %hhi \n", img->Hdata[0], img->SVdata[S][0], img->SVdata[V][0]);
+    for (size_t i = 1; i < 20; i++)
+    {
+        printf("%hi %hhu %hhu \n", img->Hdata[i], img->SVdata[S][i], img->SVdata[V][i]);
+    }*/
+
     result->ChannelSize = malloc(3 * sizeof(unsigned long)); // tableau de 3 size h+s+v
     assert(result->ChannelSize);
     result->SVdata = malloc(2 * sizeof(GLubyte *));
@@ -539,16 +549,20 @@ void save_compressed_HSV_image(char * filename, Image_HSV_compressed * img){
     fprintf(fp, "%lu %lu %lu\n", img->ChannelSize[S], img->ChannelSize[V], img->ChannelSize[H]);
     
     c = fwrite(img->SVdata[S], (size_t) 1, (size_t) img->ChannelSize[S], fp);
-    printf("wrote c : %ld  | expected : %ld\n", c, img->ChannelSize[S]);
+    printf("wrote S : %ld  | expected : %ld\n", c, img->ChannelSize[S]);
     c = fwrite(img->SVdata[V], (size_t) 1, (size_t) img->ChannelSize[V], fp);
-    printf("wrote c : %ld  | expected : %ld\n", c, img->ChannelSize[V]);
+    printf("wrote V : %ld  | expected : %ld\n", c, img->ChannelSize[V]);
     c = fwrite(img->Hdata, (size_t) sizeof(GLshort), (size_t) img->ChannelSize[H], fp);
-    printf("wrote c : %ld  | expected : %ld\n", c, img->ChannelSize[H]);
+    printf("wrote H : %ld  | expected : %ld\n", c, img->ChannelSize[H]);
     
+    /*
+    printf("Expected data:\n%hi %hhi %hhi \n", img->Hdata[0], img->SVdata[S][0], img->SVdata[V][0]);
+    for (size_t i = 1; i < 20; i++)
+    {
+    printf("%hi %hhu %hhu \n", img->Hdata[i], img->SVdata[S][i], img->SVdata[V][i]);
+    }*/
     
-    printf("%hi %hhi %hhi ", img->Hdata[0], img->SVdata[S][0], img->SVdata[V][0]);
-    printf("%hu %hhu %hhu ", img->Hdata[1], img->SVdata[S][1], img->SVdata[V][1]);
-        
+
 
     fclose(fp);
 }
@@ -565,6 +579,7 @@ int Image_load(char *filename, Image *img){
     FILE *fp;
     int b, c, rgb_comp_color, size, sizex, sizey;
 	GLubyte tmp, * ptrdeb, *ptrfin, *lastline;
+    unsigned long r;
     //open PPM file for reading
     fp = fopen(filename, "rb");
     if (!fp) {
@@ -665,9 +680,13 @@ int Image_load(char *filename, Image *img){
         img_comp.data[RED] = malloc(img_comp.ChannelSize[RED] * sizeof(GLubyte));
         img_comp.data[GREEN] = malloc(img_comp.ChannelSize[GREEN] * sizeof(GLubyte));
         img_comp.data[BLUE] = malloc(img_comp.ChannelSize[BLUE] * sizeof(GLubyte));
-        fread(img_comp.data[RED], 1, img_comp.ChannelSize[RED], fp);
-        fread(img_comp.data[GREEN], 1, img_comp.ChannelSize[GREEN], fp);
-        fread(img_comp.data[BLUE], 1, img_comp.ChannelSize[BLUE], fp);
+
+        r = fread(img_comp.data[RED], (size_t)1, (size_t)img_comp.ChannelSize[RED], fp);
+        printf("R blocs read = %lu | expected %lu\n",r, img_comp.ChannelSize[RED]);
+        r = fread(img_comp.data[GREEN], (size_t)1, (size_t)img_comp.ChannelSize[GREEN], fp);
+        printf("G blocs read = %lu | expected %lu\n",r, img_comp.ChannelSize[GREEN]);
+        r = fread(img_comp.data[BLUE], (size_t)1, (size_t)img_comp.ChannelSize[BLUE], fp);
+        printf("B blocs read = %lu | expected %lu\n",r, img_comp.ChannelSize[BLUE]);
         
 
         /*
@@ -702,18 +721,20 @@ int Image_load(char *filename, Image *img){
             fprintf(stderr, "Invalid image size (error loading '%s')\n", filename);
             exit(1);
         }
-        /*
-        printf("H size: %lu\n", img_comp.ChannelSize[H]);
-        printf("S size: %lu\n", img_comp.ChannelSize[S]);
-        printf("V size: %lu\n", img_comp.ChannelSize[V]);
-        */
+        
+        //printf("H size: %lu\nS size: %lu\nV size: %lu\n", img_comp.ChannelSize[H], img_comp.ChannelSize[S], img_comp.ChannelSize[V]);
+        
 
         img_comp.SVdata[S] = malloc(img_comp.ChannelSize[S] * sizeof(GLubyte));
         img_comp.SVdata[V] = malloc(img_comp.ChannelSize[V] * sizeof(GLubyte));
         img_comp.Hdata = malloc(img_comp.ChannelSize[H] * sizeof(GLshort));
-        fread(img_comp.SVdata[S], 1, img_comp.ChannelSize[S], fp);
-        fread(img_comp.SVdata[V], 1, img_comp.ChannelSize[V], fp);
-        fread(img_comp.Hdata, sizeof(GLshort), img_comp.ChannelSize[H], fp);
+        r = fread(img_comp.SVdata[S], (size_t) 1, (size_t) img_comp.ChannelSize[S], fp);
+        printf("S blocs read = %lu | expected = %lu\n", r, img_comp.ChannelSize[S]);
+        r = fread(img_comp.SVdata[V], (size_t) 1, (size_t) img_comp.ChannelSize[V], fp);
+        printf("V blocs read = %lu | expected = %lu\n", r, img_comp.ChannelSize[V]);
+        r = fread(img_comp.Hdata, (size_t) sizeof(GLshort),(size_t) img_comp.ChannelSize[H], fp);
+        printf("H blocs read = %lu | expected = %lu\n", r, img_comp.ChannelSize[H]);
+        
         
         /*
         printf("reading done\n");
@@ -952,4 +973,27 @@ void printf_compressed_img(Image_RGB_compressed img){
         printf("%hhu ", img.data[2][i]);
     }
     
+}
+
+void free_images(Image * img1, Image_RGB_compressed * img2, Image_HSV * img3, Image_HSV_compressed * img4){
+    if(img1 != NULL){
+        free(img1->data);
+        free(img1);
+    }
+    if(img2 != NULL){
+        free(img2->ChannelSize);
+        free(img2->data);
+    }
+    if(img3 != NULL){
+        free(img3->Hdata);
+        free(img3->SVdata[S]);
+        free(img3->SVdata[V]);
+        free(img3->SVdata);
+    }
+    if(img4 != NULL){
+        free(img4->Hdata);
+        free(img4->SVdata[S]);
+        free(img4->SVdata[V]);
+        free(img4->SVdata);
+    }
 }
