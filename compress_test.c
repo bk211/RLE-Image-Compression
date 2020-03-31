@@ -125,6 +125,16 @@ Image gen_test_image(int i){
         }
 
         return foo;
+    }else if(i == 8){
+        foo.sizeX = 900;
+        foo.sizeY = 600;
+        foo.data = malloc( foo.sizeX* foo.sizeY * 3 *sizeof(GLubyte));
+        for (size_t i = 0; i < foo.sizeX * foo.sizeY ; i++){
+                foo.data[i * 3 ] = 120;
+                foo.data[i * 3 +1] = 200;
+                foo.data[i * 3 +2] = 100;
+        }
+        return foo;
     }
     else{
         foo.sizeX = 1;
@@ -174,28 +184,28 @@ int main(int argc, char const *argv[])
     GLshort h;
     GLubyte bf1, bf2, br, bg, bb;
     
-    printf("RGB %hhu %hhu %hhu\n", r1, g1, b1);
+    //printf("RGB %hhu %hhu %hhu\n", r1, g1, b1);
     rgb_to_hsv(r1, g1, b1, &h, &bf1, &bf2);
-    printf("RGB-HSV %hi %hhu %hhu\n", h, bf1, bf2);
+    //printf("RGB-HSV %hi %hhu %hhu\n", h, bf1, bf2);
     hsv_to_rgb(h, bf1, bf2, &br, &bg, &bb);
-    printf("HSV-RGB %hhu %hhu %hhu\n", br, bg, bb);
+    //printf("HSV-RGB %hhu %hhu %hhu\n", br, bg, bb);
     
     
-    Image hh = gen_test_image(-1);
-    printf("printing image:\n");
-    print_image(hh);
+    Image hh = gen_test_image(8); 
+    //printf("printing image:\n");
+    //print_image(hh);
     Image_HSV tt;
     conv_RGB_img_to_HSV_img(&hh, &tt);
-    printf("printing hsv:\n");    
-    printf("%hi %hhi %hhi \n", tt.Hdata[0], tt.SVdata[S][0], tt.SVdata[V][0]);
+    //printf("printing hsv:\n");    
+    //printf("%hi %hhi %hhi \n", tt.Hdata[0], tt.SVdata[S][0], tt.SVdata[V][0]);
         
     Image_HSV_compressed cc;
     create_compressed_image_from_HSV(&tt, &cc);
     save_compressed_HSV_image("out.ppm", &cc);
     Image ff;
     Image_load("out.ppm", &ff);
-    printf("printing image:\n");
-    print_image(ff);
+    //printf("printing image:\n");
+    //print_image(ff);
     
     /*
     FILE * fp1,* fp2;

@@ -90,7 +90,7 @@ GLbyte * reduce_raw_compressed(GLbyte* raw_compressed, unsigned long * size){
             result[index_pt] = raw_compressed[i];//savegarde du compteur
             result[empty_pt++] = raw_compressed[i+1];//sauvegarde de la valeur 
         }
-        else if(result[index_pt] < 0 && (result[index_pt] - raw_compressed[i] > -128)){// si compteur de redution encours
+        else if(result[index_pt] < 0 && (result[index_pt] - raw_compressed[i] >= -127)){// si compteur de redution encours
             /*printf("in reduce case i=%ld\n",i);
             printf("%hhi %hhi %hhi \n",result[0], result[1] , result[2]);
             printf("%hhi %hhi %hhi \n",result[index_pt] , raw_compressed[i], result[index_pt] - raw_compressed[i]);
@@ -261,7 +261,7 @@ GLshort * reduce_raw_compressed_hue(GLshort* raw_compressed, unsigned long * siz
             result[index_pt] = raw_compressed[i];//savegarde du compteur
             result[empty_pt++] = raw_compressed[i+1];//sauvegarde de la valeur 
         }
-        else if(result[index_pt] < 0 && (result[index_pt] - raw_compressed[i] > -32767)){// si compteur de redution encours
+        else if(result[index_pt] < 0 && (result[index_pt] - raw_compressed[i] >= -32767)){// si compteur de redution encours
             //printf("here \n");
             //printf("%hi %hi %hi \n",result[0], result[1] , result[2]);
             //printf("%hi %hi %hi \n",result[index_pt] , raw_compressed[i], result[index_pt] - raw_compressed[i]);
@@ -308,7 +308,7 @@ unsigned long compress_GLshort(GLshort * data, GLshort * storage, unsigned long 
         {
             //printf("%hhu, ", data[i]);
             if(buffer == data[i]){//si suite de valeur identique
-                if(counter < 32766){
+                if(counter < 32767){
                     counter++;
                 }else{
                     //printf("<limit counter, push up new> ");
