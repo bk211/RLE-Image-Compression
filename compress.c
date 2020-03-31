@@ -161,11 +161,11 @@ void rgb_to_hsv(GLubyte r, GLubyte g, GLubyte b, short * h, GLubyte * s, GLubyte
     
     if(C == 0 ){// cas indefinie
         *h = 361;
-        //printf("c0, %hi",T);
+        //printf("c0, %hi",*h);
     }else if(M == R){
         *h = round(fmod(((G-B) / C ) , 6) * 60);
         *h = *h > 0? *h : *h + 360; 
-    //    printf("R*h = %hi \n",*h);
+        //printf("R*h = %hi \n",*h);
     }else if(M == G){
         *h = round(fmod(((B-R) / C + 2) , 6) * 60);
         *h = *h > 0? *h : *h + 360; 
@@ -173,7 +173,7 @@ void rgb_to_hsv(GLubyte r, GLubyte g, GLubyte b, short * h, GLubyte * s, GLubyte
     }else if(M == B){
         *h = round(fmod(((R-G) / C + 4), 6.0) * 60);
         *h = *h > 0? *h : *h + 360; 
-  //      printf("BT = %hi \n",*h);    
+        //printf("BT = %hi \n",*h);    
     }
     
     if(M == 0 ){
@@ -544,8 +544,11 @@ void save_compressed_HSV_image(char * filename, Image_HSV_compressed * img){
     printf("wrote c : %ld  | expected : %ld\n", c, img->ChannelSize[V]);
     c = fwrite(img->Hdata, (size_t) sizeof(GLshort), (size_t) img->ChannelSize[H], fp);
     printf("wrote c : %ld  | expected : %ld\n", c, img->ChannelSize[H]);
-
     
+    
+    printf("%hi %hhi %hhi ", img->Hdata[0], img->SVdata[S][0], img->SVdata[V][0]);
+    printf("%hu %hhu %hhu ", img->Hdata[1], img->SVdata[S][1], img->SVdata[V][1]);
+        
 
     fclose(fp);
 }
@@ -699,27 +702,27 @@ int Image_load(char *filename, Image *img){
             fprintf(stderr, "Invalid image size (error loading '%s')\n", filename);
             exit(1);
         }
-        
-        /*printf("H size: %lu\n", img_comp.ChannelSize[H]);
+        /*
+        printf("H size: %lu\n", img_comp.ChannelSize[H]);
         printf("S size: %lu\n", img_comp.ChannelSize[S]);
         printf("V size: %lu\n", img_comp.ChannelSize[V]);
         */
-        
+
         img_comp.SVdata[S] = malloc(img_comp.ChannelSize[S] * sizeof(GLubyte));
         img_comp.SVdata[V] = malloc(img_comp.ChannelSize[V] * sizeof(GLubyte));
         img_comp.Hdata = malloc(img_comp.ChannelSize[H] * sizeof(GLshort));
         fread(img_comp.SVdata[S], 1, img_comp.ChannelSize[S], fp);
         fread(img_comp.SVdata[V], 1, img_comp.ChannelSize[V], fp);
-        fread(img_comp.Hdata, 1, img_comp.ChannelSize[H], fp);
+        fread(img_comp.Hdata, sizeof(GLshort), img_comp.ChannelSize[H], fp);
+        
         /*
         printf("reading done\n");
         printf("%hi %hhi %hhi\n",img_comp.Hdata[0], img_comp.SVdata[0][0], img_comp.SVdata[1][0]);
          for (size_t i = 1; i < 5; i++){
         printf("%hi %hhu %hhu\n", img_comp.Hdata[i], img_comp.SVdata[0][i], img_comp.SVdata[1][i]);
         }
-        printf("end img_comp \n");
-        */
-
+        printf("end img_comp \n");*/
+        
         Image_HSV img_hsv;
         decompress_HSV(&img_comp, &img_hsv);
         
