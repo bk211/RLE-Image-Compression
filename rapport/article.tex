@@ -1,6 +1,8 @@
 \documentclass[12pt, letterpaper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{fancyvrb}
 
 \title{Rapport de projet : Compression d'image par la méthode Run-Length-Encoding}
 \author{Chaolei Cai
@@ -30,6 +32,202 @@ Il est demandé de satisfaire ces points suivants.
     \item Écrire dans chaque cas la fonction qui code en mode RLE, la fonction qui fait la sauvegarde et la fonction qui permet d'afficher une image ainsi sauvegardée. 
     \item Essayer votre méthode sur un bon nombre d'images et comparer les résultats obtenus, en particulier par rapport à des méthodes concurrentes (LZW...).
 \end{itemize}
+Le projet est disponible sur mon entrepôt GitHub via le lien suivant:\\
+\url{https://github.com/bk211/RLE-Image-Compression}
+
+\section{Dépendances, compilation et exécution du programme}
+\subsection{Dépendances}
+Le programme seul ne devrait que nécessiter des library "GL/glut.h" et "GL/glu.h", 
+Sur un environnement Windows ou Mac, il faudra eventuellement modifier l'inclusion de ces 2 headers.\\
+Il est recommandé de disposer de l'outils make et doxygen afin d'utiliser le Makefile et d'avoir accès à la documentation.\\
+Le projet a été developpé sous OS Archlinux, Kernel: Linux 5.5.11-arch1-1, Architecture: x86-64\\
+Si vous sur un environnement Debian, le projet de devrait pas rencontrer de problème de dépendances.
+
+\subsection{Compilation}
+Pour compiler le projet, une simple commande \$make suffit.
+
+\subsection{Execution}
+Pour exécuter le projet, plusieurs options sont à votre diposition
+\begin{itemize}
+    \item \$make run, lanceras l'exécutable sur l'image morty.ppm du dossier img/.
+    \item \$./exec XXX, où XXX est le chemin relative vers l'image ppm à ouvrir.
+    \item \$make run FILE=XXX, où XXX est le chemin relative vers l'image ppm à ouvrir.
+\end{itemize}
+\subsection{Autres}
+D'autre cible make sont aussi disponible.
+\begin{itemize}
+    \item \$make clean, permet de supprimer les binaires géneré par la compilation
+    \item \$make doc, permet de génerer la documentation doxygen sous format html ou latex, ils apparaîtront dans le répertoire du même nom
+    
+\end{itemize}
+
+\section{Présentation de l'algorithme}
+Le run-length encoding, appelé en français le codage par plages,
+est un algorithme de compression de données sans perte en informatique. \\
+Par exemple, considérant la séquence suivant:\\
+WWWWWWWWWWWWBWWWWWWWWWWWWWWBBBWWW\\WWWWWWWWWWWWWWWWWWWWBWWWWWWWWWWW\\
+Après compression, donneras le résultats suivant:\\
+12W1B14W3B23W1B11W\\
+Le premier remarque qu'on peut faire sur cet algorithme est qu'il dépend fortement de la présence ou non de 
+répetition sur une même ligne, par exemple pour l'exemple qui suit:\\
+WBWBWBWBWB\\
+La compression donne ce resultat:\\
+1W1B1W1B1W1B1W1B1W1B\\
+A la fin, la taille du fichier a doublé, il existe donc une version qui gère mieux ce problème 
+qu'on appel la méthode SGI, le même exemple donneras alors:\\
+-10WBWBWBWBWB\\
+S'il y a un long motif de non répetition, le compteur se désincremente pour signifier pour les N caractères qui suivent, 
+ils seront différent.\\
+Le fichier après compression est toujours plus grand que l'original, d'ailleurs, la taille post-compression n'est pas garantie à être plus petite, cependant, si on applique l'algorithme à une plus grande échelle, 
+on peut espèrer obtenir un ratio de compression inférieur à 1 (La formule utilisée est Taille post-compression / Taille pré-compression).
+
+\section{Présentation du code}
+Une documentation existe pour ce projet, je ne vais donc pas vous présenter toutes les fonctions, car en réalité, nombreux sont les fonctions qui 
+s'occupent de l'allocation mémoire plutôt que l'algorithme en lui même.
+\subsection{main.c \& ppm.c}
+Fichiers de base donnée par M.Bourdin, ils permettent de lire et d'afficher une image .ppm
+
+\subsection{compress.h  \& ima.h}
+Ces sont les headers utilisés pour ce projet, je vais donc vous présenter les différentes structure qui y sont déclarées.
+\subsubsection{Image}
+\begin{verbatim}
+    struct Image {
+        unsigned long sizeX;
+        unsigned long sizeY;
+        GLubyte *data;
+    };
+    typedef struct Image Image;        
+\end{verbatim}
+Image est la structure de base d'une image sous format RGB, il y a donc 3 informations, les 2 premières sont les dimensions de l'image, 
+enfin, la dernière est un tableau de donnée linéaire de type GLubyte, les champs Rouge, Vert et Bleu sont mélangés entre eux, 
+il faut donc effectuer une petite gymnatique d'esprit pour obtenir la valeur d'une pixel.\\
+Il faut lire ce vecteur par paquet de trio, chaque trio étant constitué des valeurs R, G et B.
+
+\subsubsection{Image\_RGB\_compressed}
+\begin{verbatim}
+    struct Image_RGB_compressed{
+        unsigned long sizeX;
+        unsigned long sizeY;
+        unsigned long * ChannelSize;
+        GLubyte **data;
+    };
+    typedef struct Image_RGB_compressed Image_RGB_compressed;
+\end{verbatim}
+Image\_RGB\_compressed est la structure d'image compressée sous format RGB, nous avons toujours nos champs sizeX et sizeY. 
+Un nouveau champs ChannelSize est disponible, c'est un tableau qui contient la taille des 3 champs R, G et B.\\
+Enfin data est devenu GLubyte ** data, car j'ai décidé de séparer les 3 champs de couleurs. \\
+J'ai aussi choisis une representation dynamique par l'intermédiaire de pointer, même si pour ce projet, si on reste sur nos 3 champs RGB, il est plus économique de 
+déclarer directement 3 GLubyte *, et 3 unsigned long car nous n'avons pas besoin de pointer additionnel. Néaumoins, il est toujours possible au projet d'évoluer au cours du temps, 
+et d'avoir par exemple 4 voir 5 champs de données au lieu de 3.
+
+\subsubsection{Image\_HSV}
+\begin{verbatim}
+    struct Image_HSV{
+        unsigned long sizeX;
+        unsigned long sizeY;
+        GLshort * Hdata;
+        GLubyte **SVdata;
+    };
+    typedef struct Image_HSV Image_HSV;
+\end{verbatim}
+Image\_HSV est la structure de base d'une image sous format HSV, il y a toujours les dimensions sizeX et sizeY. 
+les champs S et V sont regroupé via un deuxième tableau SVdata. le champs H a été séparé des 2 autres car étant donné qu'il doit stocker une valeurs comprise entre 0 et 360,
+le type GLubyte n'est plus suffisante([0:255] sur 1 octet), il faut donc prendre un GLshort à la place([-43767:43767] sur 2 octet).\\
+Ce octet en plus est aussi la raison pourquoi notre implémentation HSV est plus lourde que RGB.
+
+\subsubsection{Image\_HSV\_compressed}
+\begin{verbatim}
+    struct Image_HSV_compressed{
+        unsigned long sizeX;
+        unsigned long sizeY;
+        unsigned long * ChannelSize;
+        GLshort * Hdata;
+        GLubyte **SVdata;
+    };
+    typedef struct Image_HSV_compressed Image_HSV_compressed;
+\end{verbatim}
+Image\_HSV\_compressed est la structure d'image compressé sous format HSV, il n'est pas très différente de Image\_HSV, car il y a 
+juste un champs ChannelSize en plus. Ayant déja fini le projet à la rédaction de ce rapport, Image\_HSV n'est pas très utile en réalité, 
+car sa fonctionalité est entièrement recouverte par Image\_HSV\_compressed, ce qui m'aurait 
+permis d'éviter d'écrire les fonctions de conversion de Image\_HSV vers Image\_HSV\_compressed.
+
+\section{compress.c}
+Globalement nous pouvons diviser ce fichier en 2 parties, la première est consacrée à la compression sous format RGB, 
+la seconde à la compression sous format HSV.
+\subsection{Compression RGB}
+Pour utilisateur, il n'a pas besoin de connaître les détails de l'implémentation car la compression est encapsulée via la fonction \\
+\textit{create\_compressed\_image\_from\_RGB()}\\
+Il suffit passer en paramètre de la fonction l'adresse de l'image source, ainsi que l'adresse de l'image\_RGB\_compressed.\\
+Nous allons donc prendre le point de vue de l'utilisateur et descendre petit à petit dans le programme.
+\subsubsection{create\_compressed\_image\_from\_RGB}
+\begin{verbatim}
+int create_compressed_image_from_RGB(Image *img,
+                            Image_RGB_compressed *result){
+  result->sizeX = img->sizeX;
+  result->sizeY = img->sizeY;
+  result->data = malloc( 3 * sizeof( unsigned long) );
+  assert(result->data);
+  result->ChannelSize = malloc( 3 * sizeof( GLubyte *));
+  assert(result->ChannelSize);
+  result->ChannelSize[RED] = compress_RGB(*img, result, RED);
+  result->ChannelSize[GREEN]=compress_RGB(*img, result, GREEN);
+  result->ChannelSize[BLUE] = compress_RGB(*img, result, BLUE);
+  //printf_compressed_img(*result);
+  return 1;
+  }
+\end{verbatim}
+La fonction est très simple, tout d'abord, sauvegarder les dimensions original sizeX et sizeY, 
+puis 2 malloc pour avoir le tableau des tailles post-compression ainsi que le pointeur vers les 3 champs de données.
+
+\subsubsection{compress\_RGB}
+La fonction alloue la mémoire et fait appel à \textit{compress\_GLubyte} qui va effectuer une première compression 
+que j'appel "brute" car cela correspond à la première version de RLE que je vous ai présenté, par exemple, le pixel 
+\textbf{[200, 120, 140]} deviendra \textbf{[[1, 200], [1, 120], [1, 140]]}\\
+Enfin, la fonction \textit{reduce\_raw\_compressed} effectue une deuxième compression selon la méthode SGI pour avoir tableau de donnée plus compacte.
+
+\subsubsection{compress\_GLubyte}
+\begin{Verbatim}[numbers=left,xleftmargin = 5mm]
+unsigned long compress_GLubyte(GLubyte * data, GLbyte * storage
+    ,int type, unsigned long size, unsigned long img_step){
+        GLubyte buffer = data[type];
+        GLbyte counter =0;
+        unsigned long k = 0;
+        for (unsigned long i = type; i < size * img_step; i+=img_step)
+            {
+                if(buffer == data[i]){
+                    if(counter < 127){
+                        counter++;
+                    }else{
+                        storage[k++] = counter; 
+                        storage[k++] = buffer;
+                        counter = 1;
+                    }
+                }else{
+                    storage[k++] = counter; 
+                    storage[k++] = buffer;
+                    counter = 1;
+                    buffer = data[i];
+                }
+            }
+            storage[k++] = counter; 
+            storage[k++] = buffer;
+        return k;
+    }
+}
+\end{Verbatim}
+Il y a beaucoup de paramètre à cette fonction car je m'en sert dans les 2 format de compression, car il permet de compresser des GLubyte comme son nom l'indique. En paramètre donc:
+\begin{itemize}
+    \item \textbf{data} et \textbf{storage} sont les tableaux de données source et de destination
+    \item \textbf{type} indique le type de champs à lire, il peut s'agir d'un des 3 champs RGB ou des champs S ou V pour le format HSV.
+    Plus concrétement, il donne l'emplacement de la tête de lecture.
+    \item \textbf{size} est la taille du tableau data.
+    \item \textbf{img\_step} est le pas de lecture à effectuer à chaque tour de boucle, pour le format RGB, il faut faire un saut de 3 à chaque fois, pour le format HSV, 1 seul pas suffit comme les données ne sont pas mélangées.
+\end{itemize}
+On itère donc sur le tableau data via le tampon de lecture de donnée \textbf{buffer}, ligne 8, si la valeur actuel \textbf{data[i]} est identique à notre buffer,
+2 cas se présente, soit le compteur est inférieur à 127, nous pouvons incrémenter compteur et passer à la suivante. 
+
+
+
 
 %\begin{figure}
 %    \includegraphics[width=\linewidth]{img/L1.png}
@@ -37,9 +235,7 @@ Il est demandé de satisfaire ces points suivants.
 %    \label{fig:L1}
 %\end{figure}
 
-
-\subsection{Profile}
 %\includegraphics[width=\linewidth]{img/L6.png}
  
-
 \end{document}
+

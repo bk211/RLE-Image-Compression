@@ -35,31 +35,23 @@ unsigned long compress_GLubyte(GLubyte * data, GLbyte * storage, int type, unsig
     unsigned long k = 0;
     for (unsigned long i = type; i < size * img_step; i+=img_step)
         {
-            //printf("%hhu, ", data[i]);
-            if(buffer == data[i]){//si suite de valeur identique
+            if(buffer == data[i]){
                 if(counter < 127){
                     counter++;
                 }else{
-                    //printf("<limit counter, push up new> ");
                     storage[k++] = counter; 
                     storage[k++] = buffer;
                     counter = 1;
                 }
-            //    printf(">i=%ld : same\n", i);
-            }else{ // sinon 
-            //    printf(">i=%ld : not same\n", i);
-                //sauvegarde dans storage
+            }else{
                 storage[k++] = counter; 
                 storage[k++] = buffer;
-                //reaffectation du nouveau buffer de test
                 counter = 1;
                 buffer = data[i];
             }
         }
-
         storage[k++] = counter; 
         storage[k++] = buffer;
-
     return k;
 }
 
@@ -268,16 +260,14 @@ void conv_RGB_img_to_HSV_img(Image *src, Image_HSV *result){
 int create_compressed_image_from_RGB(Image *img, Image_RGB_compressed *result){
     result->sizeX = img->sizeX;
     result->sizeY = img->sizeY;
-    result->data = malloc( 3 * sizeof( result->data) ); // 3 ptr vers 3 tableau de donner non alloue
+    result->data = malloc( 3 * sizeof( unsigned long) );
     assert(result->data);
-    result->ChannelSize = malloc( 3 * sizeof( result->ChannelSize));// tableau de 3 size rgb
+    result->ChannelSize = malloc( 3 * sizeof( GLubyte *));
     assert(result->ChannelSize);
     result->ChannelSize[RED] = compress_RGB(*img, result, RED);
     result->ChannelSize[GREEN] = compress_RGB(*img, result, GREEN);
     result->ChannelSize[BLUE] = compress_RGB(*img, result, BLUE);
-
     //printf_compressed_img(*result);
-
     return 1;
 }
 
