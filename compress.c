@@ -511,23 +511,13 @@ void save_compressed_RGB_image(char * filename, Image_RGB_compressed * img){
     fprintf(fp, "%lu %lu %lu\n", img->ChannelSize[RED], img->ChannelSize[GREEN], img->ChannelSize[BLUE]);
     
     // pixel data
-    if( (c = fwrite(img->data[RED], (size_t) 1, (size_t) img->ChannelSize[RED], fp)) != img->ChannelSize[RED]){
-        fprintf(stderr, "Failed to write data\n");
-        exit(1);
+    for (size_t i = 0; i < 3; i++){
+        if( (c = fwrite(img->data[i], (size_t) 1, (size_t) img->ChannelSize[i], fp)) != img->ChannelSize[i]){
+            fprintf(stderr, "Failed to write data\n");
+            exit(1);
+        }
+        printf("wrote c : %ld  | expected : %ld\n", c, img->ChannelSize[i]);
     }
-    printf("wrote c : %ld  | expected : %ld\n", c, img->ChannelSize[RED]);
-
-    if( (c = fwrite(img->data[GREEN], (size_t) 1, (size_t) img->ChannelSize[GREEN], fp)) != img->ChannelSize[GREEN]){
-        fprintf(stderr, "Failed to write data\n");
-        exit(1);
-    }
-    printf("wrote c : %ld  | expected : %ld\n", c, img->ChannelSize[GREEN]);
-    
-    if( (c = fwrite(img->data[BLUE], (size_t) 1, (size_t) img->ChannelSize[BLUE], fp)) != img->ChannelSize[BLUE]){
-        fprintf(stderr, "Failed to write data\n");
-        exit(1);
-    }
-    printf("wrote c : %ld  | expected : %ld\n", c, img->ChannelSize[BLUE]);
 
     fclose(fp);
 }
@@ -730,7 +720,7 @@ int Image_load(char *filename, Image *img){
             fprintf(stderr,"Failed to read data");
             exit(1);
         }
-        
+
         img_comp.Hdata = malloc(img_comp.ChannelSize[H] * sizeof(GLshort));
         printf("H blocs read = %lu | expected = %lu\n", r, img_comp.ChannelSize[H]);
 
