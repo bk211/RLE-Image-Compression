@@ -689,27 +689,14 @@ int Image_load(char *filename, Image *img){
             exit(1);
         }
         
-        img_comp.data[RED] = malloc(img_comp.ChannelSize[RED] * sizeof(GLubyte));
-        img_comp.data[GREEN] = malloc(img_comp.ChannelSize[GREEN] * sizeof(GLubyte));
-        img_comp.data[BLUE] = malloc(img_comp.ChannelSize[BLUE] * sizeof(GLubyte));
-
-        if((r = fread(img_comp.data[RED], (size_t)1, (size_t)img_comp.ChannelSize[RED], fp)) != img_comp.ChannelSize[RED] ){
-            fprintf(stderr,"Failed to read data");
-            exit(1);
+        for (size_t i = 0; i < 3; i++){
+            img_comp.data[i] = malloc(img_comp.ChannelSize[i] * sizeof(GLubyte));
+            if((r = fread(img_comp.data[i], (size_t)1, (size_t)img_comp.ChannelSize[i], fp)) != img_comp.ChannelSize[i] ){
+                fprintf(stderr,"Failed to read data");
+                exit(1);
+            }
+            printf("Blocs read = %lu | expected %lu\n",r, img_comp.ChannelSize[RED]);
         }
-        printf("R blocs read = %lu | expected %lu\n",r, img_comp.ChannelSize[RED]);
-
-        if((r = fread(img_comp.data[GREEN], (size_t)1, (size_t)img_comp.ChannelSize[GREEN], fp)) != img_comp.ChannelSize[GREEN] ){
-            fprintf(stderr,"Failed to read data");
-            exit(1);
-        }
-        printf("G blocs read = %lu | expected %lu\n",r, img_comp.ChannelSize[GREEN]);
-        
-        if((r = fread(img_comp.data[BLUE], (size_t)1, (size_t)img_comp.ChannelSize[BLUE], fp)) != img_comp.ChannelSize[BLUE] ){
-            fprintf(stderr,"Failed to read data");
-            exit(1);
-        }
-        printf("B blocs read = %lu | expected %lu\n",r, img_comp.ChannelSize[BLUE]);
         
         decompress_RGB(&img_comp, img);
 
@@ -727,7 +714,6 @@ int Image_load(char *filename, Image *img){
         
         img_comp.SVdata[S] = malloc(img_comp.ChannelSize[S] * sizeof(GLubyte));
         img_comp.SVdata[V] = malloc(img_comp.ChannelSize[V] * sizeof(GLubyte));
-        img_comp.Hdata = malloc(img_comp.ChannelSize[H] * sizeof(GLshort));
         if((r = fread(img_comp.SVdata[S], (size_t) 1, (size_t) img_comp.ChannelSize[S], fp)) != img_comp.ChannelSize[S] ){
             fprintf(stderr,"Failed to read data");
             exit(1);
@@ -744,6 +730,8 @@ int Image_load(char *filename, Image *img){
             fprintf(stderr,"Failed to read data");
             exit(1);
         }
+        
+        img_comp.Hdata = malloc(img_comp.ChannelSize[H] * sizeof(GLshort));
         printf("H blocs read = %lu | expected = %lu\n", r, img_comp.ChannelSize[H]);
 
         Image_HSV img_hsv;
