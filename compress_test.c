@@ -190,11 +190,11 @@ int main(int argc, char const *argv[])
     //printf("RGB-HSV %hi %hhu %hhu\n", h, bf1, bf2);
     hsv_to_rgb(h, bf1, bf2, &br, &bg, &bb);
     //printf("HSV-RGB %hhu %hhu %hhu\n", br, bg, bb);
+    */
     
-    
-    Image hh = gen_test_image(8); 
+    Image hh = gen_test_image(-8); 
     //printf("printing image:\n");
-    //print_image(hh);
+    print_image(hh);
     Image_HSV tt;
     conv_RGB_img_to_HSV_img(&hh, &tt);
     //printf("printing hsv:\n");    
@@ -203,16 +203,16 @@ int main(int argc, char const *argv[])
     Image_HSV_compressed cc;
     create_compressed_image_from_HSV(&tt, &cc);
     save_compressed_HSV_image("out.ppm", &cc);
-    */
+    
 
-    Image ff;
-    Image_load("img/hibou.ppm", &ff);
+    //Image ff;
+    //Image_load("img/hibou.ppm", &ff);
     //printf("printing image:\n");
     //print_image(ff);
     //printf("printing image:\n");
     //print_image(hh);
-    Image_HSV tt;
-    conv_RGB_img_to_HSV_img(&ff, &tt);
+    //Image_HSV tt;
+    //conv_RGB_img_to_HSV_img(&ff, &tt);
 
     /*
     printf("printing hsv:\n");    
@@ -224,8 +224,8 @@ int main(int argc, char const *argv[])
     }
     */
 
-    Image_HSV_compressed cc;
-    create_compressed_image_from_HSV(&tt, &cc);
+    //Image_HSV_compressed cc;
+    //create_compressed_image_from_HSV(&tt, &cc);
     /*printf("printing comp hsv:\n");    
     
     printf("%hi %hhi %hhi \n", cc.Hdata[0], cc.SVdata[S][0], cc.SVdata[V][0]);
@@ -234,9 +234,9 @@ int main(int argc, char const *argv[])
         printf("%hi %hhu %hhu \n", cc.Hdata[i], cc.SVdata[S][i], cc.SVdata[V][i]);
     }*/
 
-    save_compressed_HSV_image("out.ppm", &cc);
-    Image zz;
-    Image_load("out.ppm", &zz);
+    //save_compressed_HSV_image("out.ppm", &cc);
+    //Image zz;
+    //Image_load("out.ppm", &zz);
 
     /*
     FILE * fp1,* fp2;
