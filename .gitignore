@@ -59,3 +59,8 @@ foobar.ppm
 .vscode/*
 *.txt
 *.ppm
+
+# doxygen file ignore
+Doxyfile.bak
+html/*
+latex/*
