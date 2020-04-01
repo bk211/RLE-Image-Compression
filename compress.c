@@ -568,7 +568,7 @@ void save_compressed_HSV_image(char * filename, Image_HSV_compressed * img){
     
     printf("wrote V : %ld  | expected : %ld\n", c, img->ChannelSize[V]);
     if((c = fwrite(img->Hdata, (size_t) sizeof(GLshort), (size_t) img->ChannelSize[H], fp)) != img->ChannelSize[V]){
-        fprintf(stderr, "Failed to write data\n");
+        fprintf(stderr, "Failed to write data\n",c);
         exit(1);
     }
     printf("wrote H : %ld  | expected : %ld\n", c, img->ChannelSize[H]);

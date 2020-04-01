@@ -1,7 +1,6 @@
-#include <unistd.h>     
-#include <math.h>
+#include <unistd.h>
 #include "compress.h"
-
+#include <time.h>
 #include <GL/glut.h>
 #include <GL/glu.h>	
 
@@ -9,7 +8,8 @@ Image *image;
 Image_RGB_compressed * image_RGB_comp;
 Image_HSV * image_HSV;
 Image_HSV_compressed * image_HSV_comp;
-
+clock_t cp;
+int tps_init, tps_crt, dtps;
 
 #define ESCAPE 27
 
@@ -44,8 +44,15 @@ int Init(char *s) {
     fprintf(stderr, "Out of memory\n");
     return(-1);
   }
+
+  tps_init = (int) clock();
   if (Image_load(s, image)==-1) 
-	return(-1);
+	  return(-1);
+  tps_crt = (int) clock();
+  dtps = tps_crt - tps_init;
+  printf("Time for Image_load = %d | %ld sec\n", dtps, dtps/ CLOCKS_PER_SEC);
+  
+
   printf("tailles %d %d\n",(int) image->sizeX, (int) image->sizeY);
 
   glClearColor(0.0, 0.0, 0.0, 0.0);
@@ -99,21 +106,30 @@ void menuFunc(int item) {
     exit(0);
     break;
   case 1:
+    tps_init = (int) clock();
     free_images(NULL, image_RGB_comp, NULL, NULL);
     image_RGB_comp = (Image_RGB_compressed *) malloc(sizeof(Image_RGB_compressed));
     printf("Compression en cours...\n");
     create_compressed_image_from_RGB(image,  image_RGB_comp);
     printf("Fin de la compression \n");
-    
+    tps_crt = (int) clock();
+    dtps = tps_crt - tps_init;
+    printf("Time for RGB compression = %d | %ld sec\n", dtps, dtps/ CLOCKS_PER_SEC);
+      
     printf("Entrer le nom pour l'image dans cette taille\n");    
     scanf("%s", &s[0]);
+    tps_init = (int) clock();
     save_compressed_RGB_image(s, image_RGB_comp);
     printf("save succes\n");
-    
+    tps_crt = (int) clock();
+    dtps = tps_crt - tps_init;
+    printf("Time for RGB compression save = %d | %ld sec\n", dtps, dtps/ CLOCKS_PER_SEC);
+  
 
     break;
   
   case 2:
+    tps_init = (int) clock();
     free_images(NULL, NULL, image_HSV, image_HSV_comp);
     printf("Compression en cours...\n");
     image_HSV = (Image_HSV*) malloc(sizeof(Image_HSV));
@@ -121,12 +137,20 @@ void menuFunc(int item) {
     image_HSV_comp = (Image_HSV_compressed*) malloc(sizeof(Image_HSV_compressed));
     create_compressed_image_from_HSV(image_HSV, image_HSV_comp);
     printf("Fin de la compression \n");
-    
+    tps_crt = (int) clock();
+    dtps = tps_crt - tps_init;
+    printf("Time for HSV compression = %d | %ld sec\n", dtps, dtps/ CLOCKS_PER_SEC);
+  
+
     printf("Entrer le nom pour l'image dans cette taille\n");    
     scanf("%s", &s[0]);
+    tps_init = (int) clock();
     save_compressed_HSV_image(s, image_HSV_comp);
     printf("save succes\n");
-
+    tps_crt = (int) clock();
+    dtps = tps_crt - tps_init;
+    printf("Time for HSV compression save = %d | %ld sec\n", dtps, dtps/ CLOCKS_PER_SEC);
+  
     break;
   
   case 3:
