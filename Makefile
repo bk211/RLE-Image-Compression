@@ -50,3 +50,6 @@ test:	compress_test.c compress.o
 
 rtest:	test
 	./test
+
+doc:	Doxyfile
+	doxygen $<

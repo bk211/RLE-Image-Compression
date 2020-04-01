@@ -240,7 +240,7 @@ void conv_RGB_HSV(Image *src, Image_HSV * dst, unsigned long size){
  * @brief convert a RGB image to HSV image, malloc the necessary memory to dst
  * 
  * @param src ptr to source RGB image
- * @param dst ptr to destination HSV image
+ * @param result ptr to destination HSV image
  */
 void conv_RGB_img_to_HSV_img(Image *src, Image_HSV *result){
     result->sizeX = src->sizeX;
@@ -823,7 +823,7 @@ void conv_HSV_RGB(Image_HSV *src, Image * dst, unsigned long size){
  * @brief convert a HSV image to RGB image
  * 
  * @param src ptr to source HSV image
- * @param dst ptr to destination RGB image
+ * @param result ptr to destination RGB image
  */
 void conv_HSV_img_to_RGB_img(Image_HSV *src, Image *result){
     result->sizeX = src->sizeX;
@@ -863,13 +863,11 @@ void decompress_HSV(Image_HSV_compressed *img, Image_HSV * result){
 
 
 /**
- * @brief decompress the compressed GLubyte array to destination array
+ * @brief decompress the compressed GLshort array to destination array
  * 
  * @param src source compressed array
  * @param dst destination array
  * @param size_src size of the source array
- * @param pos sub-position in the pixel
- * @param coeff coefficient to apply to get the real position of the pixel
  */
 void decompress_GLshort(GLshort * src, GLshort * dst, unsigned long size_src){
     unsigned long j = 0;
