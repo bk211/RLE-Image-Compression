@@ -704,12 +704,13 @@ int Image_load(char *filename, Image *img){
         }
         printf("V blocs read = %lu | expected = %lu\n", r, img_comp.ChannelSize[V]);
 
+
+        img_comp.Hdata = malloc(img_comp.ChannelSize[H] * sizeof(GLshort));
         if((r = fread(img_comp.Hdata, (size_t) sizeof(GLshort),(size_t) img_comp.ChannelSize[H], fp)) != img_comp.ChannelSize[H] ){
             fprintf(stderr,"Failed to read data");
             exit(1);
         }
 
-        img_comp.Hdata = malloc(img_comp.ChannelSize[H] * sizeof(GLshort));
         printf("H blocs read = %lu | expected = %lu\n", r, img_comp.ChannelSize[H]);
 
         Image_HSV img_hsv;
