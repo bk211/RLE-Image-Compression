@@ -417,32 +417,32 @@ void create_compressed_image_from_HSV(Image_HSV *img , Image_HSV_compressed *res
  * @param coeff coefficient to apply to get the real position of the pixel
  */
 void decompress_GLubytes(GLubyte * src, GLubyte * dst, unsigned long size_src, int pos, int coeff){
-    unsigned long j = 0;
+    unsigned long i = 0;
     GLbyte iter_buffer;
     GLubyte value_buffer;
     unsigned long size_counter = 0;
-    while (j < size_src){
-        iter_buffer = src[j];
+    while (i < size_src){
+        iter_buffer = src[i];
         //printf("iter_buffer = %hhi\n", iter_buffer);
         if(iter_buffer > 0){//simple high repetition case 
             //printf("positive case\n");
-            value_buffer = src[j+1];
+            value_buffer = src[i+1];
             for (size_t k = 0; k < iter_buffer; k++){
                 //printf("value_buffer = %hhu ,pos = %ld\n",value_buffer,size_counter * coeff + pos );
                 dst[size_counter++ * coeff + pos] = value_buffer;
             }
-            j+=2;
+            i+=2;
 
         }else{ //negative repetition case
             //printf("negative case\n");
             iter_buffer = iter_buffer * -1;
 
             for (size_t k = 0; k < iter_buffer; k++){
-                value_buffer = src[++j];
+                value_buffer = src[++i];
                 //printf("value_buffer = %hhu ,pos = %ld\n",value_buffer,size_counter * coeff + pos );
                 dst[size_counter++ * coeff + pos] = value_buffer;
             }
-            j++;               
+            i++;               
         }
     }
 }
@@ -456,7 +456,6 @@ void decompress_GLubytes(GLubyte * src, GLubyte * dst, unsigned long size_src, i
 void decompress_RGB(Image_RGB_compressed *img, Image * result){
     result->sizeX = img->sizeX;
     result->sizeY = img->sizeY;
-    
     //printf(">channels size: %lu %lu %lu\n", img->ChannelSize[RED], img->ChannelSize[GREEN], img->ChannelSize[BLUE]);
     result->data = malloc( result->sizeX * result->sizeY * 3 * sizeof(GLubyte));
     assert(result->data);

@@ -419,8 +419,53 @@ Enfin la fonction \textit{decompress\_RGB} est appelé pour decompresser l'image
 
 \subsubsection{decompress\_RGB}
 \begin{Verbatim}[numbers=left,xleftmargin = 5mm]
+void decompress_RGB(Image_RGB_compressed *img, Image * result){
+  result->sizeX = img->sizeX;
+  result->sizeY = img->sizeY;
+  //printf(">channels size: %lu %lu %lu\n", img->ChannelSize[RED],
+           img->ChannelSize[GREEN], img->ChannelSize[BLUE]);
+  result->data = malloc( result->sizeX * result->sizeY * 3 * sizeof(GLubyte));
+  assert(result->data);
 
+  for (int i = 0; i < 3; i++){
+    decompress_GLubytes(img->data[i], result->data, img->ChannelSize[i], i, 3);    
+  }
+}
 \end{Verbatim}
+
+
+\subsubsection{decompress\_GLubyte}
+\begin{Verbatim}[numbers=left,xleftmargin = 5mm]
+void decompress_GLubytes(GLubyte * src, GLubyte * dst, unsigned long size_src, 
+                                                int pos, int coeff){
+  unsigned long i = 0;
+  GLbyte iter_buffer;
+  GLubyte value_buffer;
+  unsigned long size_counter = 0;
+  while (i < size_src){
+    iter_buffer = src[i];
+    if(iter_buffer > 0){
+      value_buffer = src[i+1];
+      for (size_t k = 0; k < iter_buffer; k++){
+        dst[size_counter++ * coeff + pos] = value_buffer;
+      }
+      i+=2;
+
+    }else{ 
+      iter_buffer = iter_buffer * -1;
+      for (size_t k = 0; k < iter_buffer; k++){
+        value_buffer = src[++i];
+          dst[size_counter++ * coeff + pos] = value_buffer;
+      }
+        i++;               
+    }
+  }
+}
+\end{Verbatim}
+La décompression est très simple, tant que i
+
+
+
 %\begin{figure}
 %    \includegraphics[width=\linewidth]{img/L1.png}
 %    \caption{Welcome page}
