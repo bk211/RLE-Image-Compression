@@ -126,8 +126,8 @@ Image gen_test_image(int i){
 
         return foo;
     }else if(i == 8){
-        foo.sizeX = 900;
-        foo.sizeY = 600;
+        foo.sizeX = 2560;
+        foo.sizeY = 1440;
         foo.data = malloc( foo.sizeX* foo.sizeY * 3 *sizeof(GLubyte));
         for (size_t i = 0; i < foo.sizeX * foo.sizeY ; i++){
                 foo.data[i * 3 ] = 120;
@@ -192,17 +192,23 @@ int main(int argc, char const *argv[])
     //printf("HSV-RGB %hhu %hhu %hhu\n", br, bg, bb);
     */
     
-    Image hh = gen_test_image(-8); 
+    
+    Image hh = gen_test_image(8); 
     //printf("printing image:\n");
+    imagesave_PPM("green.ppm", &hh);
+    /*
     print_image(hh);
     Image_HSV tt;
     conv_RGB_img_to_HSV_img(&hh, &tt);
+    */
     //printf("printing hsv:\n");    
     //printf("%hi %hhi %hhi \n", tt.Hdata[0], tt.SVdata[S][0], tt.SVdata[V][0]);
-        
+
+      /*  
     Image_HSV_compressed cc;
     create_compressed_image_from_HSV(&tt, &cc);
     save_compressed_HSV_image("out.ppm", &cc);
+    */
     
 
     //Image ff;

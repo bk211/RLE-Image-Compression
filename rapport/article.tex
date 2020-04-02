@@ -3,6 +3,7 @@
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{fancyvrb}
+\usepackage{array}
 
 \title{Rapport de projet : Compression d'image par la méthode Run-Length-Encoding}
 \author{Chaolei Cai
@@ -117,7 +118,7 @@ Image\_RGB\_compressed est la structure d'image compressée sous format RGB, nou
 Un nouveau champs ChannelSize est disponible, c'est un tableau qui contient la taille des 3 champs R, G et B.\\
 Enfin data est devenu GLubyte ** data, car j'ai décidé de séparer les 3 champs de couleurs. \\
 J'ai aussi choisis une representation dynamique par l'intermédiaire de pointer, même si pour ce projet, si on reste sur nos 3 champs RGB, il est plus économique de 
-déclarer directement 3 GLubyte *, et 3 unsigned long car nous n'avons pas besoin de pointer additionnel. Néaumoins, il est toujours possible au projet d'évoluer au cours du temps, 
+déclarer directement 3 GLubyte *, et 3 unsigned long car nous n'avons pas besoin de pointer additionnel. Néanmoins, il est toujours possible au projet d'évoluer au cours du temps, 
 et d'avoir par exemple 4 voir 5 champs de données au lieu de 3.
 
 \subsubsection{Image\_HSV}
@@ -313,9 +314,7 @@ Enfin écriture des données se fait via le boucle for, les 3 champs ne sont pas
 Si le nombre de blocs écrite ne correspond pas à la taille attendu, une erreur est affiché et le programme fait un exit(1).
 
 \subsection{Conversion RGB - HSV}
-Pour les formules de conversion RGB - HSV ou HSV - RGB, j'ai utilisé les formules du site RapidTables, voici les liens:\\
-\url{https://www.rapidtables.com/convert/color/rgb-to-hsv.html}\\
-\url{https://www.rapidtables.com/convert/color/hsv-to-rgb.html}
+Pour les formules de conversion RGB - HSV ou HSV - RGB, j'ai utilisé les formules du site RapidTables.
 
 \subsubsection{conv\_RGB\_img\_to\_HSV\_img}
 Cette fonction permet d'allouer la mémoire pour les data de l'image HSV, puis fait appel à 
@@ -538,14 +537,137 @@ La réalisation de la conversion se trouve dans la fonction \textit{hsv\_to\_rgb
 
 \section{Perfomances}
 
+\subsection{Performances mémoire}
+Voici donc les chiffres brutes de performances, l'unité étant l'octet, mais je vous invite à lire le second 
+tableau qui donne des résultats en pourcentage.
 
-%\begin{figure}
-%    \includegraphics[width=\linewidth]{img/L1.png}
-%    \caption{Welcome page}
-%    \label{fig:L1}
-%\end{figure}
+\begin{tabular}{l|l|l|l}
+  Nom  & Taille initial & RGB & HSV\\
+  \hline  
+  can\_bottom2 & 2359338 & 2248984 & 2684052\\
+  \hline
+  chatou & 2359312 & 2363552 & 3114237\\
+  \hline
+  Cordiliere2\_V3 & 2359312 & 2305594 & 2735828\\
+  \hline
+  Kili\_mais & 2359312 & 2314257 & 2961350\\
+  \hline
+  Refuges & 2359312 & 2248984 & 2768863\\
+  \hline
+  requin\_leopard & 2359312 & 2363125 & 3105719\\
+  \hline
+  comic & 1639876 & 1189401 & 1445574 \\
+  \hline
+  mickey & 503781 & 131542 & 131891\\
+  \hline
+  morty & 879255 & 437527 & 521014\\
+  \hline
+  morty\_with\_imagesave & 879271 & 437520 & 521016 \\
+  \hline
+  green & 11059223 & 174213 & 116609 \\
+\end{tabular}
 
-%\includegraphics[width=\linewidth]{img/L6.png}
- 
+\begin{tabular}{l|l|l|l}
+  Nom  & Taille initial & RGB & HSV\\
+  \hline  
+  can\_bottom2 & 100\% & 95.32\% & 113.76\% \\
+  \hline
+  chatou & 100\% & 100.17\% & 131.99\% \\
+  \hline
+  Cordiliere2\_V3 & 100\% & 97.72\% & 115.95\% \\
+  \hline
+  Kili\_mais & 100\% & 98.09\% & 125.51\%  \\
+  \hline
+  Refuges & 100\% & 95.32\% & 117.35\% \\
+  \hline
+  requin\_leopard & 100\% & 100.16\% & 131.63\% \\
+  \hline
+  comic & 100\% & 72.52\% & 88.15\% \\
+  \hline
+  mickey & 100\% & 26.11\% & 26.18\%\\
+  \hline
+  morty & 100\% & 49.76\% & 59.25\% \\
+  \hline
+  morty\_with\_imagesave & 100\% & 49.75\% & 59.25\% \\
+  \hline
+  green & 100\% & 1.57\% & 1.05\% \\
+\end{tabular}
+
+\subsection{Analyse}
+\hspace{1cm}Sur les exemples de M.Bourdin qui ont une dimension de 1024 x 768, la compression sous RGB est très faible voir positif 
+(pourcentage supérieur à 100\%), cela s'explique par le fait que ce sont des photos réel, 
+il n'y a très peu de cas que l'algo traîte comme des répetition.\\
+Même si l'oeil humain ne detecte pas la différence, très souvent dans les zone où ont considère "uniforme", 
+il existe en réalité une légère différence de couleurs entre les pixels voisins. Ce qui empêche le programme de compresser.\\
+Néanmoins, la taille post-compression est proche de 100\%, il faut tenir compte du fait qu'après la compression notre donnée n'est 
+plus "pur", c'est un mélange de indicateur de répetition et de valeur de couleur. Ce n'est encourageant, mais pas "mauvais" en réalité.\\
+\\\hspace{1cm}En conclusion à cette partie, cet algorithme n'est pas adapté aux Images à forte entropie, il depend 
+d'une certaine manière de la disposition des répetition des zones de couleurs. 
+Par exemple, lors de la lecture, l'image est applati sous forme de vecteur de donnée de manière horizontale 
+(de gauche à droite puis de haut en bas).\\
+Une image (petite) comme le drapeau français est plus favorable à cet algorithme 
+qu'un drapeau hollandais. Bien évidemment, si l'image du drapeau a une definition 2k, vous ne verrez pas de différence notable 
+entre ces 2 images.
+\break
+\\
+En ce qui concerne la compression HSV, nous avons une élevation de taille post-compression.\\
+Mais la compression HSV est en réalité plus performante que la compression RGB, 
+tout d'abord nous avons une très légère perte lors de la conversion RGB vers HSV, ce qui fait que 
+le programme est moins sensible faible variation de couleur.\\
+Sur des couleurs proche, la variation HSV est très faible, la plupart du temps, le Hue reste inchangé, 
+seul la saturation ou le value champs change. Ce format permet de découvrir plus de repétition que le format RGB.\\
+\\
+Comment expliquer ses mauvaises performances alors? Cela viens de notre choix de définir 
+les champs HSV par un short et deux char, un short permet de stocker une valeur comprise entre -43767 et + 43767. \\
+Alors que nous avons seulement besoin de stocker une valeur comprise entre 0 et 360, il y a donc un déchet de 86000 plage 
+exploitable. Il en est de même pour les champs S et V, nous avons seulement besoin d'une plage comprise entre 0 et 100, alors 
+qu'un GLubyte permet une portée de 0 à 255.\\
+Pour un trio RGB, il faut donc \textbf{3 octets} ou \textbf{24 bits}, pour un trio HSV, la plus petite espace mémoire que nous avons besoin 
+n'est en réalité que de \textbf{7bits + 7bits + 9 bits = 23 bits}. Dans notre implémentation, nous utilisons \textbf{4 octets} ou \textbf{32bits}.
+Il y a donc une variation de \textbf{+39\%} ou \textbf{-29\%} selon votre formule de calcule de delta (32/23 ou 23/32 -1).\\
+Néanmoins, je n'ai pas choisis d'implémenter la version HSV 23 bits car il faut jouer avec des masques binaires, qui constitue une charge de travail
+en plus sur le developpement. Rapellons que notre but n'est pas de produire le programme de compression RLE le plus performant, car la roue est déja inventé 
+à plusieurs reprise. Mais d'étudier l'algorithme d'un point de vue pédagogique. 
+\break
+\\
+\hspace{1cm}En ce qui concerne les images que j'ai chosis, les résultats sont plus sympathique.
+Il faut noter que la plus part de ces image sont plus petite et à plus faible entropie car ce sont des 
+images de cartoon, les couleurs sont facilement distinctes. Le programme donne à la fin des fichiers bien plus petite.
+\break
+\\
+\hspace{1cm}Enfin la dernière image, green est une image haute résolution 2K(2560x1440)!\\
+Il pèse plus de 10 Méga-octets avant la compression, après une séance de compression dans notre programme,
+il ne pèse plus que 170 Kilo-octets! Mieux encore, sous HSV, nous frôlons la bar des 100 Kilo-octets.\\
+Cela correspond à une compression de \textbf{99\%}! \\
+Trève de plaisanterie, en enlevant la valeur haute et la valeur basse, en moyenne, sur ces exemples, 
+nous avons une compression de \textbf{76\%} sous RGB, et \textbf{93\%} sous HSV.\\
+Il est correcte sur les fichiers légère, mais peu productive sur les fichiers lourde. 
+Par exemple sur les images photo, la compression est proche de 100\% 
+alors qu'avec la méthode d'arbre BSP la compression moyenne est d'ordre \textbf{70\%} (D'après Etienne).\\
+Par manque de donnée, la comparaison avec d'autre algorithme de compression d'image n'a pas pu aboutir.
+
+
+\subsection{Performances temps}
+En me basant sur les exemples précedente, je relève une vitesse de 
+compression comprise entre 30 000 et 100 000 coup d'horloge.\\
+En terme de compléxité, il n'a pas de lourde boucle imbriquée dans le programme, les opérations 
+les plus coûteuses sont la compression brute et seconde compression. Il est donc raisonable de faire 
+l'hypothese que notre programme a une compléxité O(N).
+
+\subsection{references \& sources}
+Support de developpement:\\
+-cours et base de developpement de M.Bourdin\\
+-Wikipedia:\\
+\url{https://fr.wikipedia.org/wiki/Run-length_encoding}\\
+Formules utilisées pour les conversion :\\ 
+\url{https://www.rapidtables.com/convert/color/rgb-to-hsv.html}\\
+\url{https://www.rapidtables.com/convert/color/hsv-to-rgb.html}\\
+Image de batman (comic)\\
+\url{https://www.originalcomics.fr/facsimile-edition/17692-detective\\-comics-38-facsimile-edition-vo.html}\\
+Image de morty: \\
+\url{https://www.pinterest.com/pin/793548396830391678/}\\
+
+
+
 \end{document}
 
