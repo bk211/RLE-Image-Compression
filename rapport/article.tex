@@ -462,8 +462,81 @@ void decompress_GLubytes(GLubyte * src, GLubyte * dst, unsigned long size_src,
   }
 }
 \end{Verbatim}
-La décompression est très simple, tant que i
+La décompression est très simple, tant que i est inférieur à la taille du tableau (ligne 7), 
+\textbf{iter\_buffer} reçoit le compteur, si \textbf{iter\_buffer} est positif (ligne9), \textbf{value\_buffer} reçoit la valeur 
+\textbf{src[i+1]}, et on affecte autant de fois de valeur dans \textbf{dst}.\\
+Dans le cas contraire (ligne 16), le compteur est négatif, nous sommes face à une série de non répetition, il faut 
+alors recopier les valeurs suivantes dans \textbf{dst}.
 
+\subsection{Lecture et décompression HSV}
+La lecture et la décompression se fait aussi via la fonction \textit{Image\_load}.
+\subsubsection{Image\_load}
+\begin{Verbatim}[numbers=left,xleftmargin = 5mm]
+int Image_load(char *filename, Image *img){
+...
+}else if(buff[1] == '8'){
+  Image_HSV_compressed img_comp;
+  img_comp.sizeX = img->sizeX;
+  img_comp.sizeY = img->sizeY;
+  img_comp.ChannelSize = malloc(3 * sizeof(unsigned long));
+  img_comp.SVdata = malloc(2 * sizeof(GLubyte*));
+
+  if (fscanf(fp, "%lu %lu %lu\n", &img_comp.ChannelSize[S], 
+                &img_comp.ChannelSize[V], &img_comp.ChannelSize[H]) != 3){
+      fprintf(stderr, "Invalid image size (error loading '%s')\n", filename);
+      exit(1);
+  }
+  
+  img_comp.SVdata[S] = malloc(img_comp.ChannelSize[S] * sizeof(GLubyte));
+  img_comp.SVdata[V] = malloc(img_comp.ChannelSize[V] * sizeof(GLubyte));
+  
+  if((r = fread(img_comp.SVdata[S], (size_t) 1, 
+                (size_t) img_comp.ChannelSize[S], fp)) 
+                                                != img_comp.ChannelSize[S] ){
+      fprintf(stderr,"Failed to read data");
+      exit(1);
+  }
+  printf("S blocs read = %lu | expected = %lu\n", r, img_comp.ChannelSize[S]);
+
+  if((r = fread(img_comp.SVdata[V], (size_t) 1, 
+                (size_t) img_comp.ChannelSize[V], fp))
+                                                != img_comp.ChannelSize[V] ){
+      fprintf(stderr,"Failed to read data");
+      exit(1);
+  }
+  printf("V blocs read = %lu | expected = %lu\n", r, img_comp.ChannelSize[V]);
+
+  if((r = fread(img_comp.Hdata, (size_t) sizeof(GLshort),
+                (size_t) img_comp.ChannelSize[H], fp))
+                                                != img_comp.ChannelSize[H]){
+      fprintf(stderr,"Failed to read data");
+      exit(1);
+  }
+
+  img_comp.Hdata = malloc(img_comp.ChannelSize[H] * sizeof(GLshort));
+  printf("H blocs read = %lu | expected = %lu\n", r, img_comp.ChannelSize[H]);
+
+  Image_HSV img_hsv;
+  decompress_HSV(&img_comp, &img_hsv);
+  conv_HSV_img_to_RGB_img(&img_hsv, img);
+}
+
+\end{Verbatim}
+Dans une première partie, (ligne4-8) nous allouons de la mémoire pour une stucture
+\textbf{Image\_HSV\_compressed}.\\
+Ensuite il faut lire la tailles des tableaux de données HSV (ligne 10) pour allouer la mémoire nécessaire (ligne 16,17 et 42).\\
+Nous pouvons alors lire les données stockées via 3 commandes \textit{fread} (ligne 19, 27, 35).
+Enfin, nous pouvons décompresser notre stucture \\\textbf{Image\_HSV\_compressed} vers une structure \textbf{Image\_HSV} (ligne 46).\\
+Finalement, via \textit{conv\_HSV\_img\_to\_RGB\_img} nous obtenons notre image RGB décompressé "d'origine" à quelque valeur près.
+
+\subsubsection{decompress\_HSV}
+Il s'agit simplement d'une allocation mémoire suivie d'appels à \\\textit{decompress\_GLubyte} et \textit{decompress\_GLshort}
+
+\subsubsection{conv\_HSV\_img\_to\_RGB\_img}
+La conversion se fait de la même manière que RGB vers HSV, cela se résume à des formules mathématiques à appliquer.\\
+La réalisation de la conversion se trouve dans la fonction \textit{hsv\_to\_rgb}.
+
+\section{Perfomances}
 
 
 %\begin{figure}
