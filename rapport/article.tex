@@ -187,33 +187,32 @@ Enfin, la fonction \textit{reduce\_raw\_compressed} effectue une deuxième compr
 
 \subsubsection{compress\_GLubyte}
 \begin{Verbatim}[numbers=left,xleftmargin = 5mm]
-unsigned long compress_GLubyte(GLubyte * data, GLbyte * storage
-    ,int type, unsigned long size, unsigned long img_step){
+
+    unsigned long compress_GLubyte(GLubyte * data, GLbyte * storage, int type, 
+                    unsigned long size, unsigned long img_step){
         GLubyte buffer = data[type];
         GLbyte counter =0;
         unsigned long k = 0;
-        for (unsigned long i = type; i < size * img_step; i+=img_step)
-            {
-                if(buffer == data[i]){
-                    if(counter < 127){
-                        counter++;
-                    }else{
-                        storage[k++] = counter; 
-                        storage[k++] = buffer;
-                        counter = 1;
-                    }
+        for (unsigned long i = type; i < size * img_step; i+=img_step){
+            if(buffer == data[i]){
+                if(counter < 127){
+                    counter++;
                 }else{
                     storage[k++] = counter; 
                     storage[k++] = buffer;
                     counter = 1;
-                    buffer = data[i];
                 }
+            }else{
+                storage[k++] = counter; 
+                storage[k++] = buffer;
+                counter = 1;
+                buffer = data[i];
             }
-            storage[k++] = counter; 
-            storage[k++] = buffer;
+        }
+        storage[k++] = counter; 
+        storage[k++] = buffer;
         return k;
     }
-}
 \end{Verbatim}
 Il y a beaucoup de paramètre à cette fonction car je m'en sert dans les 2 format de compression, car il permet de compresser des GLubyte comme son nom l'indique. En paramètre donc:
 \begin{itemize}
@@ -223,12 +222,205 @@ Il y a beaucoup de paramètre à cette fonction car je m'en sert dans les 2 form
     \item \textbf{size} est la taille du tableau data.
     \item \textbf{img\_step} est le pas de lecture à effectuer à chaque tour de boucle, pour le format RGB, il faut faire un saut de 3 à chaque fois, pour le format HSV, 1 seul pas suffit comme les données ne sont pas mélangées.
 \end{itemize}
-On itère donc sur le tableau data via le tampon de lecture de donnée \textbf{buffer}, ligne 8, si la valeur actuel \textbf{data[i]} est identique à notre buffer,
-2 cas se présente, soit le compteur est inférieur à 127, nous pouvons incrémenter compteur et passer à la suivante. 
+On itère donc sur le tableau data via le tampon de lecture de donnée \textbf{buffer}\\
+ligne 8, si la valeur lue \textbf{data[i]} est identique à notre buffer,
+2 cas se présente, soit le compteur est inférieur à 127, 
+nous pouvons incrémenter compteur et passer à la valeur suivante. 
+Sinon la valeur maximal du compteur est déja atteinte,
+il faut alors sauvegarder le compteur et le buffer dans storage, 
+puis mettre le compteur à 1 comme si le buffer avait changer.\\
+Ligne 16, c'est le où la valeur lue \textbf{data[i]} est différente de notre \textbf{buffer}, il faut alors sauvegarder notre compteur et le buffer dans storage, remettre le compteur à 1 et enfin, changer la valeur du \textbf{buffer}.\\
+Enfin, ligne 23-24 une dernière sauvegarde est effectué pour gérer la fin de lecture et le nombre de blocs utilisé \textbf{k} est retourné.
 
+\subsubsection{reduce\_raw\_compressed}
+\begin{Verbatim}[numbers=left,xleftmargin = 5mm]
+GLbyte * reduce_raw_compressed(GLbyte* raw_compressed, unsigned long * size){
+  GLbyte * result = malloc( *size * sizeof(GLbyte));
+  assert(result);
+  result[0] = 0;
+  unsigned long empty_pt = 0, index_pt = 0;
+  for (unsigned long i = 0; i < *size; i+=2){   
+    if(raw_compressed[i] > maximum_repeat){
+      index_pt = empty_pt++; 
+      result[index_pt] = raw_compressed[i];
+      result[empty_pt++] = raw_compressed[i+1];
+    }
+    else if(result[index_pt] < 0 
+        && (result[index_pt] - raw_compressed[i] >= -127)){
+      result[index_pt] -= raw_compressed[i];
+      for (unsigned long j = 0; j < raw_compressed[i]; j++){
+      result[empty_pt++] = raw_compressed[i+1];
+      }    
+    }else{
+      index_pt = empty_pt++; 
+      result[index_pt] = raw_compressed[i] * -1; 
+      for (unsigned long j = 0; j < raw_compressed[i]; j++){
+        result[empty_pt++] = raw_compressed[i+1];
+      }
+    }  
+  }
+  free(raw_compressed);
+  *size = empty_pt; 
+  return result;  
+}
+\end{Verbatim}
+Cette fonction prend le relai de compress\_GLubyte, la boucle for itère avec un pas de 2, ce qui permet d'avoir seulement les cases de compteur.\\
+Tout d'abord un nouveau tableau est alloué afin de stocker le resultat de la réduction.\\
+Il y a donc 3 cas possible, La première ligne 7 est le cas où le compteur lue \textbf{raw\_compressed} est supérieur à \textbf{maximun\_repeat} (une variable global que j'ai décidé à 2, tout à fait modulable selon le besoin).\\
+Imaginons que \textbf{raw\_compressed[i]} vaut 10, il y a une succession de 10 valeurs, 
+\begin{math}10 > 2\end{math}, on sauvegarde le compteur \textbf{raw\_compressed[i]} 
+et la valeur associé \textbf{raw\_compressed[i+1]}.\\
+Ligne 12, arriver à cette ligne, nous sommes dans le cas où le compteur est inférieur à \textbf{maximun\_repeat},
+2 cas peuvent se présenter, la première étant qu'il existe déja une reduction en cours
+\begin{math}
+    \textbf{result[index\_pt] \textless 0}
+\end{math}\\
+Il faut alors vérifier si ajout du compteur lue feras déborder ou non notre compteur en cours(ligne13)\\
+Si l'ajout est possible, alors on continue à désincrementer \textbf{result[index\_pt]}
+et on rajoute à la fin du tableau résultat le nombre de valeur nécessaire.\\
+Enfin, dans le dernier cas (ligne 18), nous sommes face soit à un nouveau compteur de reduction à 
+initialiser soit notre ancien compteur de réduction a atteint sa valeur limite.
 
+\break
+A la fin nous obtenons notre image compressée sous format RGB. Il faut désormais sauvegarder notre image compressée. 
+\subsection{Sauvegarde RGB}
+La fonction \textit{save\_compressed\_RGB\_image()} permet de réaliser cette tâche, il n'est pas très différente de \textit{ImageLoad()} du fichier \textbf{ppm.c}
+\subsubsection{save\_compressed\_RGB\_image()}
 
+\begin{Verbatim}[numbers=left,xleftmargin = 5mm]
+  //image format
+  fprintf(fp, "P7\n");
+  ... écriture du header identique à ImageLoad() ... 
 
+  // channelSize 
+  fprintf(fp, "%lu %lu %lu\n", img->ChannelSize[RED], img->ChannelSize[GREEN], 
+                                            img->ChannelSize[BLUE]);
+    
+  // pixel data
+  for (size_t i = 0; i < 3; i++){
+    if( (c = fwrite(img->data[i], (size_t) 1, (size_t) img->ChannelSize[i], fp))
+                                                 != img->ChannelSize[i]){
+      fprintf(stderr, "Failed to write data\n");
+        exit(1);
+    }
+    printf("wrote c : %ld  | expected : %ld\n", c, img->ChannelSize[i]);
+}
+\end{Verbatim}
+Pas de grande nouveauté, indicateur de format vaut \textbf{P7} au lieu de 
+\textbf{P6} chez un fichier ppm classique. En plus des autres indicateurs, il faut ajouter 
+aussi les valeurs de \textbf{ChannelSize} (ligne 6).\\
+Enfin écriture des données se fait via le boucle for, les 3 champs ne sont pas mélangés, ils sont écrites dans l'ordre RGB.\\
+Si le nombre de blocs écrite ne correspond pas à la taille attendu, une erreur est affiché et le programme fait un exit(1).
+
+\subsection{Conversion RGB - HSV}
+Pour les formules de conversion RGB - HSV ou HSV - RGB, j'ai utilisé les formules du site RapidTables, voici les liens:\\
+\url{https://www.rapidtables.com/convert/color/rgb-to-hsv.html}\\
+\url{https://www.rapidtables.com/convert/color/hsv-to-rgb.html}
+
+\subsubsection{conv\_RGB\_img\_to\_HSV\_img}
+Cette fonction permet d'allouer la mémoire pour les data de l'image HSV, puis fait appel à 
+\textit{conv\_RGB\_HSV} qui va lire à chaque tour de boucle un trio RGB, calculer les valeurs HSV et les stocker dans l'image resultante.\\
+Il est utile de noter que si pour la compression RGB, l'image est garantie sans perte, ce n'est pas pour le cas pour la compression HSV, 
+cela est due à la perte d'information lors de la conversion. 
+En effet, pour le format HSV, nous utilisons que des entiers naturel, \textbf{[0-360] pour H}, 
+\textbf{[0-100] pour SV}, or, la plupart des données ont une precision après la virgule, malgré l'arrondi effectué dans 
+nos calcule, il faut attendre à une différence de +-5 entre la valeur initial et la valeur converti.
+
+\subsection{Compression HSV}
+Après la conversion, nous avons une image HSV prête à être compressé, le schéma de fonctionnement est identique à celui d'une compression 
+RGB.
+\begin{itemize}
+    \item create\_compressed\_image\_from\_HSV 
+    \item compress\_H \& compress\_SV
+    \item compress\_GLubyte $|$  compress\_GLshort
+    \item reduce\_raw\_compressed\_hue $|$ reduce\_raw\_compressed
+\end{itemize}
+Les fonctions étant très similaire à celui d'une compression RGB, je ne vais pas vous les détailler pour une seconde fois.
+
+\subsection{Sauvegarde HSV}
+\subsubsection{save\_compressed\_HSV\_image}
+\begin{Verbatim}[numbers=left,xleftmargin = 5mm]
+void save_compressed_HSV_image(char * filename, Image_HSV_compressed * img){
+    //image format
+    fprintf(fp, "P8\n");
+        ...
+    unsigned long c;
+    // channelSize // pixel data
+    fprintf(fp, "%lu %lu %lu\n", img->ChannelSize[S], img->ChannelSize[V],
+             img->ChannelSize[H]);
+    
+    if((c = fwrite(img->SVdata[S], (size_t) 1, (size_t) img->ChannelSize[S], fp)) 
+                                            != img->ChannelSize[S]){
+        fprintf(stderr, "Failed to write data\n");
+        exit(1);
+    }
+    printf("wrote S : %ld  | expected : %ld\n", c, img->ChannelSize[S]);
+    
+    if((c = fwrite(img->SVdata[V], (size_t) 1, (size_t) img->ChannelSize[V], fp)) 
+                                            != img->ChannelSize[V]){
+        fprintf(stderr, "Failed to write data\n");
+        exit(1);
+    }
+    printf("wrote V : %ld  | expected : %ld\n", c, img->ChannelSize[V]);
+    
+    if((c = fwrite(img->Hdata, (size_t) sizeof(GLshort), (size_t) 
+        img->ChannelSize[H], fp)) != img->ChannelSize[H]){
+        fprintf(stderr, "Failed to write data\n");
+        exit(1);
+    }
+    printf("wrote H : %ld  | expected : %ld\n", c, img->ChannelSize[H]);
+    fclose(fp);
+}
+\end{Verbatim}
+Le header ne change pas sauf le passage au format \textbf{P8}, ligne 7, écriture des tailles compressées.\\
+Ligne 10,17,25 écriture des données HSV via fwrite. Un contrôle est effectué pour s'assurer que le nombre de blocs écrite est correct.
+
+\subsection{Lecture et décompression RGB}
+La lecture et la décompression RGB se fait via la fonction \textit{Image\_load}, il s'agit d'une fonction que j'ai modifié en se basant sur la 
+fonction \textit{ImageLoad\_PPM} du fichier \textbf{ppm.c}
+\subsubsection{Image\_load}
+\begin{Verbatim}[numbers=left,xleftmargin = 5mm]
+int Image_load(char *filename, Image *img){
+...
+}else if(buff[1] == '7'){
+    Image_RGB_compressed img_comp;
+    img_comp.sizeX = img->sizeX;
+    img_comp.sizeY = img->sizeY;
+    img_comp.ChannelSize = malloc(3 * sizeof(unsigned long));
+    img_comp.data = malloc(3 * sizeof(GLubyte*));
+
+    if (fscanf(fp, "%lu %lu %lu\n", &img_comp.ChannelSize[RED], 
+            &img_comp.ChannelSize[GREEN], &img_comp.ChannelSize[BLUE]) != 3){
+      fprintf(stderr, "Invalid image size (error loading '%s')\n", filename);
+      exit(1);
+    }
+    
+    for (size_t i = 0; i < 3; i++){
+      img_comp.data[i] = malloc(img_comp.ChannelSize[i] * sizeof(GLubyte));
+
+      if((r = fread(img_comp.data[i], (size_t)1, 
+          (size_t)img_comp.ChannelSize[i], fp)) 
+                      != img_comp.ChannelSize[i] ){
+          fprintf(stderr,"Failed to read data");
+          exit(1);
+      }
+      printf("Blocs read = %lu | expected %lu\n",r, img_comp.ChannelSize[i]);
+    }
+    
+    decompress_RGB(&img_comp, img);
+}
+...
+}
+\end{Verbatim}
+S'il la fonction rencontre le header \textbf{P7}, il est face un fichier compressé RGB, donc il faut d'abord
+un \textit{fscanf} pour lire la taille des \textbf{ChannelSize} (ligne 10)\\
+Puis un boucle for est utilisé pour lire les champs RGB (ligne 16).\\
+Enfin la fonction \textit{decompress\_RGB} est appelé pour decompresser l'image.
+
+\subsubsection{decompress\_RGB}
+\begin{Verbatim}[numbers=left,xleftmargin = 5mm]
+
+\end{Verbatim}
 %\begin{figure}
 %    \includegraphics[width=\linewidth]{img/L1.png}
 %    \caption{Welcome page}

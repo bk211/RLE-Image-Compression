@@ -33,25 +33,24 @@ unsigned long compress_GLubyte(GLubyte * data, GLbyte * storage, int type, unsig
     GLubyte buffer = data[type];
     GLbyte counter =0;
     unsigned long k = 0;
-    for (unsigned long i = type; i < size * img_step; i+=img_step)
-        {
-            if(buffer == data[i]){
-                if(counter < 127){
-                    counter++;
-                }else{
-                    storage[k++] = counter; 
-                    storage[k++] = buffer;
-                    counter = 1;
-                }
+    for (unsigned long i = type; i < size * img_step; i+=img_step){
+        if(buffer == data[i]){
+            if(counter < 127){
+                counter++;
             }else{
                 storage[k++] = counter; 
                 storage[k++] = buffer;
                 counter = 1;
-                buffer = data[i];
             }
+        }else{
+            storage[k++] = counter; 
+            storage[k++] = buffer;
+            counter = 1;
+            buffer = data[i];
         }
-        storage[k++] = counter; 
-        storage[k++] = buffer;
+    }
+    storage[k++] = counter; 
+    storage[k++] = buffer;
     return k;
 }
 
@@ -675,7 +674,7 @@ int Image_load(char *filename, Image *img){
                 fprintf(stderr,"Failed to read data");
                 exit(1);
             }
-            printf("Blocs read = %lu | expected %lu\n",r, img_comp.ChannelSize[RED]);
+            printf("Blocs read = %lu | expected %lu\n",r, img_comp.ChannelSize[i]);
         }
         
         decompress_RGB(&img_comp, img);
