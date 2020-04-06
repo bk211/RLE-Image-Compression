@@ -1,4 +1,4 @@
-article.pdf:		article.tex
+rapport.pdf:		rapport.tex
 	pdflatex $<
 	pdflatex $<
 
