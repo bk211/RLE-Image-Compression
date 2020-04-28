@@ -148,34 +148,6 @@ Image gen_test_image(int i){
 
 }
 
-void imagesave_PPM(char *filename, Image *img)
-{
-    FILE *fp;
-    //open file for output
-    fp = fopen(filename, "wb");
-    if (!fp) {
-         fprintf(stderr, "Unable to open file '%s'\n", filename);
-         exit(1);
-    }
-
-    //write the header file
-    //image format
-    fprintf(fp, "P6\n");
-
-    //comments
-    fprintf(fp, "# Created by %s\n","CC");
-
-    //image size
-    fprintf(fp, "%lu %lu\n",img->sizeX,img->sizeY);
-
-    // rgb component depth
-    fprintf(fp, "%d\n",255);
-
-    // pixel data
-    fwrite(img->data, (size_t) 1, (size_t) (3 * img->sizeX * img->sizeY), fp);
-    fclose(fp);
-}
-
 
 
 int main(int argc, char const *argv[])

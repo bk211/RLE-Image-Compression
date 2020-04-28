@@ -647,6 +647,7 @@ alors qu'avec la méthode d'arbre BSP la compression moyenne est d'ordre \textbf
 Par manque de donnée, la comparaison avec d'autre algorithme de compression d'image n'a pas pu aboutir.
 
 
+
 \subsection{Performances temps}
 En me basant sur les exemples précedente, je relève une vitesse de 
 compression comprise entre 30 000 et 100 000 coup d'horloge.\\
@@ -654,7 +655,19 @@ En terme de compléxité, il n'a pas de lourde boucle imbriquée dans le program
 les plus coûteuses sont la compression brute et seconde compression. Il est donc raisonable de faire 
 l'hypothese que notre programme a une compléxité O(N).
 
-\subsection{references \& sources}
+
+
+\section{Conclusion}
+Je trouve que l'algorithme est simple et efficace sur les images où les répeti- tions sont nombreuse. La page de wikipedia était déja clair pour comprendre le principe, d'ailleurs, si vous 
+cherchez sur github avec le mot clé "RLE-compression-Image" ou "RLE-compression-picture", vous trouverez mon projet mais aussi ceux des étudiants des années précedente. Dans les détails, les implémentations 
+sont très différentes, et ils ont en commun que le nom de dépôt.
+Je n'ai pas rencontré de problème avec l'algorithme, la plupart du temps, 
+le problème venait de \\l'allocation de mémoire et du formattage lors de l'écriture et lecture des fichiers.\\
+J'ai décidé d'implémenter la compression en deux fois, une seule compression pouvait suffire mais j'ai trouvé les fonctions à écrire plus simple si je le fesait en 2 fois.\\
+Le projet dans sa globalité reste plutôt simple, il n'y avait pas de difficulté majeur, je ne regrette pas d'avoit choisit ce projet car compte tenu 
+du planning très chargé de projets que j'avais à rendre pour la même période, je suis plutôt satisfait d'avoir rendu le projet à temps, sans erreur à la compilation et à l'exécution.
+
+\section{references \& sources}
 Support de developpement:\\
 -cours et base de developpement de M.Bourdin\\
 -Wikipedia:\\

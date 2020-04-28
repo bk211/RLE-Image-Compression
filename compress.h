@@ -10,7 +10,7 @@
 #define V 1
 #define H 2
 #define SV 0
-
+#define maximum_repeat 2
 #define STEP_RGB 3
 #define STEP_HSV 1
 

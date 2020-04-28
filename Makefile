@@ -27,7 +27,7 @@ LDFLAGS = -lm $(GL_LDFLAGS)
 #definition des fichiers et dossiers
 PROGNAME = exec
 HEADERS = bmp.h compress.h
-SOURCES = main.c ppm.c compress.c
+SOURCES = main.c ppm.c save_load.c decompress.c compress_hsv.c compress_rgb.c
 FILE = img/morty.ppm
 OBJ = $(SOURCES:.c=.o)
 
@@ -45,11 +45,8 @@ clean:
 run:	$(PROGNAME) 
 	./$(PROGNAME) $(FILE)
 
-test:	compress_test.c compress.o
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $< compress.o -o $@ 
-
-rtest:	test
-	./test
+test:	compress_test.c ppm.o save_load.o decompress.o compress_hsv.o compress_rgb.o
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $< ppm.o save_load.o decompress.o compress_hsv.o compress_rgb.o -o $@ 
 
 doc:	Doxyfile
 	doxygen $<
